@@ -15,32 +15,39 @@
                 <div class="card-body p-4 p-lg-5 text-black">
                 <form [formGroup]="loginForm" >
                     <div class="d-flex align-items-center mb-3 pb-1">
-                    <i class="fas fa-cubes fa-2x me-3" ></i>
-                    <span class="h1 fw-bold mb-0">Logo</span>
+                        <i class="fas fa-cubes fa-2x me-3" ></i>
+                        <span class="h1 fw-bold mb-0">Logo</span>
                     </div>
 
                     <h5 class="fw-normal mb-3 pb-3" >
-                    Sign into your account
+                        Sign into your account
                     </h5>
 
                     <div  class="form-outline mb-4">
-                            <mat-form-field class="w-100">
-                                <mat-label>Enter your email</mat-label>
-                                <input
-                                    matInput
-                                    placeholder="mail@example.com"
-                                    formControlName="email"
-                                    (blur)="updateErrorMessage()"
-                                    required
-                                />
-                                
-                            </mat-form-field>
+                        <mat-form-field class="w-100">
+                            <mat-label>Enter your email</mat-label>
+                            <input
+                                matInput
+                                placeholder="mail@example.com"
+                                formControlName="email"
+                                required
+                            />
+                            @if(loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)){
+                                <mat-error class="text-danger">
+                                    {{ getEmailErrorMessage()}}
+                                </mat-error>
+                            }
+                        </mat-form-field>
                     </div>
 
                     <div class="form-outline mb-4">
                         <mat-form-field  class="w-100">
                             <mat-label>Enter your password</mat-label>
-                            <input matInput formControlName="password" required  [type]="hide() ? 'password' : 'text'" />
+                            <input
+                                matInput
+                                formControlName="password"
+                                required
+                                [type]="hide() ? 'password' : 'text'" />
                             <button
                                 mat-icon-button
                                 matSuffix
@@ -51,6 +58,13 @@
                                     {{hide() ? 'visibility_off' : 'visibility'}}
                                 </mat-icon>
                             </button>
+                            
+                            
+                            @if(loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)){
+                                <mat-error class="text-danger">
+                                    {{ getPasswordErrorMessage()}}
+                                </mat-error>
+                            }
                         </mat-form-field>
                     </div>
 
