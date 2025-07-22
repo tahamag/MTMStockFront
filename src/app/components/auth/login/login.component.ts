@@ -11,12 +11,12 @@ import { ErrorStateMatcher } from '@angular/material/core';
   selector: 'app-login',
   standalone : true,
   imports: [
-    FormsModule, 
-    MatFormFieldModule, 
-    MatInputModule, 
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
     ReactiveFormsModule,
     MatIconModule,
-    MatButtonModule, 
+    MatButtonModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
@@ -31,8 +31,8 @@ export class LoginComponent {
     private fb : FormBuilder,
     ) {
       this.loginForm = this.fb.group({
-        email : ['' , [Validators.required  , Validators.email]],
-        password : ['' , [
+        email : ['taha1@mail.com' , [Validators.required  , Validators.email]],
+        password : ['Taha@1221' , [
             Validators.required ,
             Validators.minLength(8),
             Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/)
@@ -43,7 +43,7 @@ export class LoginComponent {
   getEmailErrorMessage(): string{
     if(this.loginForm.get('email')?.hasError('required'))
       return 'Email is required';
-    
+
     return this.loginForm.get('email')? 'Invalid email format' : '';
   }
 
@@ -67,11 +67,15 @@ export class LoginComponent {
       return console.log('invalid form');
 
     this.AuthService.login(this.loginForm.get('email')?.value ,this.loginForm.get('password')?.value)
-     .subscribe({
-        next:(res : any) => console.log(res),
-        error(err) {
-            console.error(err);
+      .subscribe({
+        next:(res : any) =>{
+          console.log(res),
+          this.errorMessage.set('');
         },
-      }) 
+        error:(err : any) =>{
+          this.errorMessage.set(err.error || 'An error occurred during login');
+          console.error(err);
+        },
+      })
   }
 }
