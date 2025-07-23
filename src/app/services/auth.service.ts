@@ -16,4 +16,12 @@ export class AuthService {
     console.log(email , mot_de_passe);
     return this.http.post<Societe>(this.apiUrl+'/Auth/login' , {email , mot_de_passe}) ;
   }
+
+  saveToken (token : string): void{
+    localStorage.setItem('authToken',token);
+  }
+
+  getToken(): string{
+    return localStorage.getItem('authToken') || '';
+  }
 }

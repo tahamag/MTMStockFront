@@ -69,8 +69,8 @@ export class LoginComponent {
     this.AuthService.login(this.loginForm.get('email')?.value ,this.loginForm.get('password')?.value)
       .subscribe({
         next:(res : any) =>{
-          console.log(res),
           this.errorMessage.set('');
+          this?.AuthService.saveToken(res.token);
         },
         error:(err : any) =>{
           this.errorMessage.set(err.error || 'An error occurred during login');
