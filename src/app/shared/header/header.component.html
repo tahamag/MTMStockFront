@@ -1,0 +1,71 @@
+<!-- header.component.html -->
+<header class="dashboard-header">
+    <div class="header-content">
+      <div class="logo-section">
+        <mat-icon class="logo-icon">inventory</mat-icon>
+        <h1>MTMStock</h1>
+      </div>
+      <div class="header-actions">
+        <button mat-icon-button class="notification-btn" [matMenuTriggerFor]="notificationsMenu">
+          <mat-icon>notifications</mat-icon>
+          @if (notificationsCount() > 0) {
+            <span class="notification-badge">{{ notificationsCount() }}</span>
+          }
+        </button>
+        
+        <mat-menu #notificationsMenu="matMenu" class="notifications-menu">
+          <div class="notifications-header">
+            <h3>Notifications</h3>
+            <button mat-button color="primary" (click)="clearNotifications()">Tout marquer comme lu</button>
+          </div>
+          <div class="notification-item">
+            <mat-icon>inventory_2</mat-icon>
+            <div class="notification-content">
+              <p>Stock faible pour "Écrans LED"</p>
+              <span>Il y a 2 heures</span>
+            </div>
+          </div>
+          <div class="notification-item">
+            <mat-icon>local_shipping</mat-icon>
+            <div class="notification-content">
+              <p>Nouvelle commande #7890</p>
+              <span>Il y a 4 heures</span>
+            </div>
+          </div>
+          <div class="notification-item">
+            <mat-icon>payment</mat-icon>
+            <div class="notification-content">
+              <p>Paiement reçu pour Commande #4562</p>
+              <span>Il y a 1 jour</span>
+            </div>
+          </div>
+        </mat-menu>
+  
+        <div class="user-profile">
+          <img [src]="user().avatar" alt="User" class="user-avatar">
+          <div class="user-info">
+            <span class="user-name">{{ user().name }}</span>
+            <span class="user-role">{{ user().role }}</span>
+          </div>
+          <button mat-icon-button [matMenuTriggerFor]="userMenu">
+            <mat-icon>arrow_drop_down</mat-icon>
+          </button>
+          
+          <mat-menu #userMenu="matMenu" class="user-menu">
+            <button mat-menu-item>
+              <mat-icon>person</mat-icon>
+              <span>Profil</span>
+            </button>
+            <button mat-menu-item>
+              <mat-icon>settings</mat-icon>
+              <span>Paramètres</span>
+            </button>
+            <button mat-menu-item>
+              <mat-icon>logout</mat-icon>
+              <span>Déconnexion</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+    </div>
+  </header>

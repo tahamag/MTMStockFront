@@ -1,23 +1,23 @@
-import { AuthService } from './../../../services/auth.service';
 import { Component, signal} from '@angular/core';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import { AbstractControl, FormBuilder, FormGroup, FormGroupDirective, FormsModule, NgForm, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
-import { ErrorStateMatcher } from '@angular/material/core';
-
+import { AuthService } from '../../../services/auth/auth.service';
+import { Router, RouterModule } from '@angular/router';
 @Component({
   selector: 'app-login',
   standalone : true,
   imports: [
-    FormsModule, 
-    MatFormFieldModule, 
-    MatInputModule, 
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
     ReactiveFormsModule,
     MatIconModule,
-    MatButtonModule, 
-  ],
+    MatButtonModule,
+    RouterModule,
+],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
@@ -31,8 +31,8 @@ export class LoginComponent {
     private fb : FormBuilder,
     ) {
       this.loginForm = this.fb.group({
-        email : ['' , [Validators.required  , Validators.email]],
-        password : ['' , [
+        email : ['taha1@mail.com' , [Validators.required  , Validators.email]],
+        password : ['Taha@1221' , [
             Validators.required ,
             Validators.minLength(8),
             Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/)
@@ -43,7 +43,7 @@ export class LoginComponent {
   getEmailErrorMessage(): string{
     if(this.loginForm.get('email')?.hasError('required'))
       return 'Email is required';
-    
+
     return this.loginForm.get('email')? 'Invalid email format' : '';
   }
 
@@ -67,11 +67,15 @@ export class LoginComponent {
       return console.log('invalid form');
 
     this.AuthService.login(this.loginForm.get('email')?.value ,this.loginForm.get('password')?.value)
-     .subscribe({
-        next:(res : any) => console.log(res),
-        error(err) {
-            console.error(err);
+      .subscribe({
+        next:(res : any) =>{
+          this.errorMessage.set('');
+          this?.AuthService.setToken(res.token);
         },
-      }) 
+        error:(err : any) =>{
+          this.errorMessage.set(err.error || 'An error occurred during login');
+          console.error(err);
+        },
+      })
   }
 }

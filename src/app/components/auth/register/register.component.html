@@ -1,0 +1,198 @@
+<!-- register.component.html -->
+<div class="register-container">
+    <div class="register-header">
+      <div class="logo">
+        <mat-icon>inventory</mat-icon>
+        <span>MTMStock</span>
+      </div>
+      <h1>Gestion de Stock Professionnelle</h1>
+      <p>Inscription à la plateforme de gestion Stock</p>
+    </div>
+  
+    <div class="register-content">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <mat-card class="register-card shadow">
+            <mat-card-content>
+              <mat-stepper linear #stepper>
+                <!-- Step 1: Company Information -->
+                <mat-step [stepControl]="companyForm">
+                  <form [formGroup]="companyForm">
+                    <ng-template matStepLabel>Informations de l'Entreprise</ng-template>
+                    
+                    <h2 class="step-title">Informations sur votre entreprise</h2>
+                    <p class="step-description">Veuillez fournir les détails de votre entreprise</p>
+                    
+                    <div class="row">
+                      <div class="col-md-12">
+                        <mat-form-field appearance="outline" class="w-100 mb-3">
+                          <mat-label>Nom de l'entreprise</mat-label>
+                          <input matInput formControlName="nom" placeholder="Entrez le nom de votre entreprise">
+                          <mat-icon matSuffix>business</mat-icon>
+                          <mat-error *ngIf="companyNom?.hasError('required')">
+                            Le nom de l'entreprise est requis
+                          </mat-error>
+                          <mat-error *ngIf="companyNom?.hasError('minlength')">
+                            Le nom doit contenir au moins 2 caractères
+                          </mat-error>
+                        </mat-form-field>
+                      </div>
+                    </div>
+  
+                    <div class="row">
+                      <div class="col-md-12">
+                        <mat-form-field appearance="outline" class="w-100 mb-3">
+                          <mat-label>Ville</mat-label>
+                          <input matInput formControlName="ville" placeholder="Entrez la ville de votre entreprise">
+                          <mat-icon matSuffix>location_city</mat-icon>
+                          <mat-error *ngIf="companyVille?.hasError('required')">
+                            La ville est requise
+                          </mat-error>
+                          <mat-error *ngIf="companyVille?.hasError('minlength')">
+                            La ville doit contenir au moins 2 caractères
+                          </mat-error>
+                        </mat-form-field>
+                      </div>
+                    </div>
+  
+                    <div class="d-flex justify-content-end mt-4">
+                      <button mat-raised-button color="primary" matStepperNext 
+                              [disabled]="companyForm.invalid" class="next-button">
+                        Suivant
+                        <mat-icon>arrow_forward</mat-icon>
+                      </button>
+                    </div>
+                  </form>
+                </mat-step>
+  
+                <!-- Step 2: Employee Information -->
+                <mat-step [stepControl]="employeeForm">
+                  <form [formGroup]="employeeForm">
+                    <ng-template matStepLabel>Informations de l'Administrateur</ng-template>
+                    
+                    <h2 class="step-title">Compte Administrateur</h2>
+                    <p class="step-description">Créez votre compte administrateur pour gérer votre entreprise</p>
+                    
+                    <div class="row">
+                      <div class="col-md-12">
+                        <mat-form-field appearance="outline" class="w-100 mb-3">
+                          <mat-label>Nom complet</mat-label>
+                          <input matInput formControlName="nom" placeholder="Entrez votre nom complet">
+                          <mat-icon matSuffix>person</mat-icon>
+                          <mat-error *ngIf="employeeNom?.hasError('required')">
+                            Le nom est requis
+                          </mat-error>
+                          <mat-error *ngIf="employeeNom?.hasError('minlength')">
+                            Le nom doit contenir au moins 2 caractères
+                          </mat-error>
+                        </mat-form-field>
+                      </div>
+                    </div>
+  
+                    <div class="row">
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100 mb-3">
+                          <mat-label>Email</mat-label>
+                          <input matInput formControlName="email" type="email" placeholder="Entrez votre email">
+                          <mat-icon matSuffix>email</mat-icon>
+                          <mat-error *ngIf="employeeEmail?.hasError('required')">
+                            L'email est requis
+                          </mat-error>
+                          <mat-error *ngIf="employeeEmail?.hasError('email')">
+                            Veuillez entrer un email valide
+                          </mat-error>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100 mb-3">
+                          <mat-label>Téléphone</mat-label>
+                          <input matInput formControlName="telephone" placeholder="Entrez votre numéro de téléphone">
+                          <mat-icon matSuffix>phone</mat-icon>
+                          <mat-error *ngIf="employeeTelephone?.hasError('required')">
+                            Le téléphone est requis
+                          </mat-error>
+                          <mat-error *ngIf="employeeTelephone?.hasError('pattern')">
+                            Le numéro doit contenir 10 chiffres
+                          </mat-error>
+                        </mat-form-field>
+                      </div>
+                    </div>
+  
+                    <!--div class="row">
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100 mb-3">
+                          <mat-label>Rôle</mat-label>
+                          <mat-select formControlName="role">
+                            <mat-option *ngFor="let role of roles" [value]="role">
+                              {{role}}
+                            </mat-option>
+                          </mat-select>
+                          <mat-icon matSuffix>work</mat-icon>
+                          <mat-error *ngIf="employeeRole?.hasError('required')">
+                            Le rôle est requis
+                          </mat-error>
+                        </mat-form-field>
+                      </div>
+                    </div-->
+  
+                    <div class="row">
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100 mb-3">
+                          <mat-label>Mot de passe</mat-label>
+                          <input matInput [type]="hidePassword() ? 'password' : 'text'" 
+                            formControlName="mot_de_passe" placeholder="Créez un mot de passe">
+                          <button mat-icon-button matSuffix (click)="hidePassword.set(!hidePassword())" type="button">
+                            <mat-icon>{{hidePassword() ? 'visibility_off' : 'visibility'}}</mat-icon>
+                          </button>
+                          <mat-error class="text-danger">
+                            {{ getPasswordErrorMessage()}}
+                        </mat-error>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100 mb-3">
+                          <mat-label>Confirmer le mot de passe</mat-label>
+                          <input matInput [type]="hideConfirmPassword() ? 'password' : 'text'" 
+                            formControlName="confirmPassword" placeholder="Confirmez votre mot de passe">
+                          <button mat-icon-button matSuffix (click)="hideConfirmPassword.set(!hideConfirmPassword())" type="button">
+                            <mat-icon>{{hideConfirmPassword() ? 'visibility_off' : 'visibility'}}</mat-icon>
+                          </button>
+                          <mat-error *ngIf="employeeConfirmPassword?.hasError('required')">
+                            La confirmation du mot de passe est requise
+                          </mat-error>
+                          <mat-error *ngIf="employeeForm.hasError('mismatch')">
+                            Les mots de passe ne correspondent pas
+                          </mat-error>
+                        </mat-form-field>
+                      </div>
+                    </div>
+  
+                    <div class="d-flex justify-content-between mt-4">
+                      <button mat-stroked-button color="primary" matStepperPrevious class="back-button">
+                        <mat-icon>arrow_back</mat-icon>
+                        Retour
+                      </button>
+                      <button mat-raised-button color="primary" 
+                              (click)="onSubmit()" 
+                              [disabled]="employeeForm.invalid || isLoading()" class="submit-button">
+                        <span *ngIf="!isLoading()">Terminer l'inscription</span>
+                        <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+                      </button>
+                    </div>
+                  </form>
+                </mat-step>
+              </mat-stepper>
+            </mat-card-content>
+          </mat-card>
+  
+          <div class="login-redirect">
+            <p>Vous avez déjà un compte? <a routerLink="/login">Connectez-vous ici</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="register-footer">
+      <p>© 2025 MTMStock - Gestion de Stock Professionnelle. Tous droits réservés pour MTM.</p>
+    </div>
+  </div>

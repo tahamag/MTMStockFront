@@ -1,0 +1,148 @@
+/* register.component.css */
+.register-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .register-header {
+    background: linear-gradient(90deg, #2c3e50 0%, #4ca1af 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .logo mat-icon {
+    font-size: 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-right: 0.5rem;
+  }
+  
+  .register-header h1 {
+    margin: 0;
+    font-size: 2.2rem;
+    font-weight: 500;
+  }
+  
+  .register-header p {
+    margin: 0.5rem 0 0;
+    opacity: 0.9;
+  }
+  
+  .register-content {
+    flex: 1;
+    padding: 2rem 1rem;
+  }
+  
+  .register-card {
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  
+  .step-title {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .step-description {
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+  }
+  
+  mat-form-field {
+    width: 100%;
+  }
+  
+  .next-button, .submit-button {
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+  }
+  
+  .back-button {
+    padding: 0.5rem 1.5rem;
+  }
+  
+  .login-redirect {
+    text-align: center;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .login-redirect a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .login-redirect a:hover {
+    text-decoration: underline;
+  }
+  
+  .register-footer {
+    background: #2c3e50;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Stepper customization */
+  ::ng-deep .mat-step-header .mat-step-icon {
+    background-color: #95a5a6;
+    color: white;
+  }
+  
+  ::ng-deep .mat-step-header .mat-step-icon-selected {
+    background-color: #3498db;
+  }
+  
+  ::ng-deep .mat-step-header .mat-step-icon-state-done {
+    background-color: #2ecc71;
+  }
+  
+  /* Snackbar customization */
+  ::ng-deep .success-snackbar {
+    background-color: #2ecc71;
+    color: white;
+  }
+  
+  ::ng-deep .error-snackbar {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .register-header h1 {
+      font-size: 1.8rem;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+    }
+    
+    .logo mat-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+    }
+    
+    .register-content {
+      padding: 1rem 0.5rem;
+    }
+  }

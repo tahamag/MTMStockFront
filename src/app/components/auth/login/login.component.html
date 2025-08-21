@@ -58,8 +58,6 @@
                                     {{hide() ? 'visibility_off' : 'visibility'}}
                                 </mat-icon>
                             </button>
-                            
-                            
                             @if(loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)){
                                 <mat-error class="text-danger">
                                     {{ getPasswordErrorMessage()}}
@@ -72,10 +70,14 @@
                         <button mat-raised-button (click)="onSubmit()" class="w-100">Login</button>
                     </div>
 
+                    <mat-error class="text-danger">
+                        {{ errorMessage() }}
+                    </mat-error>
+
                     <a class="small text-muted" href="#!">Forgot password?</a>
                     <p class="mb-5 pb-lg-2">
                         Don't have an account?
-                        <a href="#!" class="text-primary">Register here</a>
+                        <a routerLink="/register" class="text-primary">Register here</a>
                     </p>
                 </form>
                 </div>

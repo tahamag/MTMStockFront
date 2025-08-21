@@ -1,0 +1,254 @@
+<!-- dashboard.component.html -->
+<div class="dashboard-container">
+  <!-- Header -->
+  <app-header></app-header>
+  
+  <!-- Main Content -->
+  <div class="dashboard-content">
+    <!-- Sidebar -->
+    <app-sidebar></app-sidebar>
+
+    <!-- Main Panel -->
+    <main class="main-panel">
+      <!-- Welcome Header -->
+      <div class="welcome-section">
+        <div class="welcome-text">
+          <h1>Bonjour, Admin!</h1>
+          <p>Voici un résumé de votre activité aujourd'hui</p>
+        </div>
+        <div class="date-filter">
+          <button mat-stroked-button>
+            <mat-icon>calendar_today</mat-icon>
+            Aujourd'hui
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="summary-grid">
+        <mat-card class="summary-card">
+          <div class="card-content">
+            <div class="card-icon total-products">
+              <mat-icon>inventory_2</mat-icon>
+            </div>
+            <div class="card-text">
+              <h3>1,248</h3>
+              <p>Produits Total</p>
+            </div>
+            <span class="trend positive">
+              <mat-icon>trending_up</mat-icon>
+              +12%
+            </span>
+          </div>
+        </mat-card>
+
+        <mat-card class="summary-card">
+          <div class="card-content">
+            <div class="card-icon low-stock">
+              <mat-icon>warning</mat-icon>
+            </div>
+            <div class="card-text">
+              <h3>42</h3>
+              <p>Stock Faible</p>
+            </div>
+            <span class="trend negative">
+              <mat-icon>trending_down</mat-icon>
+              -5%
+            </span>
+          </div>
+        </mat-card>
+
+        <mat-card class="summary-card">
+          <div class="card-content">
+            <div class="card-icon orders">
+              <mat-icon>shopping_cart</mat-icon>
+            </div>
+            <div class="card-text">
+              <h3>356</h3>
+              <p>Commandes Ce Mois</p>
+            </div>
+            <span class="trend positive">
+              <mat-icon>trending_up</mat-icon>
+              +23%
+            </span>
+          </div>
+        </mat-card>
+
+        <mat-card class="summary-card">
+          <div class="card-content">
+            <div class="card-icon revenue">
+              <mat-icon>euro</mat-icon>
+            </div>
+            <div class="card-text">
+              <h3>24,580€</h3>
+              <p>Revenu Mensuel</p>
+            </div>
+            <span class="trend positive">
+              <mat-icon>trending_up</mat-icon>
+              +18%
+            </span>
+          </div>
+        </mat-card>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="charts-grid">
+        <!-- Sales Chart -->
+        <mat-card class="chart-card">
+          <div class="card-header">
+            <h3>Ventes Mensuelles</h3>
+            <button mat-button color="primary">
+              Voir détails
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+          <div class="chart-container">
+            <div class="chart-placeholder">
+              <mat-icon>bar_chart</mat-icon>
+              <p>Graphique des ventes mensuelles</p>
+            </div>
+          </div>
+        </mat-card>
+
+        <!-- Categories Chart -->
+        <mat-card class="chart-card">
+          <div class="card-header">
+            <h3>Catégories de Produits</h3>
+            <button mat-button color="primary">
+              Voir tout
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+          <div class="chart-container">
+            <div class="chart-placeholder">
+              <mat-icon>pie_chart</mat-icon>
+              <p>Répartition par catégorie</p>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+
+      <!-- Activity Section -->
+      <div class="activity-grid">
+        <!-- Recent Activity -->
+        <mat-card class="activity-card">
+          <div class="card-header">
+            <h3>Activité Récente</h3>
+            <button mat-button color="primary">Voir Tout</button>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-icon primary">
+                <mat-icon>add</mat-icon>
+              </div>
+              <div class="activity-content">
+                <p class="activity-title">Nouveau produit ajouté</p>
+                <p class="activity-desc">Produit "Écran LED 27" ajouté au catalogue</p>
+                <span class="activity-time">Il y a 2 minutes</span>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-icon success">
+                <mat-icon>local_shipping</mat-icon>
+              </div>
+              <div class="activity-content">
+                <p class="activity-title">Commande #4567 expédiée</p>
+                <p class="activity-desc">Expédiée à Client Paris</p>
+                <span class="activity-time">Il y a 15 minutes</span>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-icon warning">
+                <mat-icon>warning</mat-icon>
+              </div>
+              <div class="activity-content">
+                <p class="activity-title">Stock faible pour "Écrans LED"</p>
+                <p class="activity-desc">Seulement 5 unités restantes</p>
+                <span class="activity-time">Il y a 1 heure</span>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-icon info">
+                <mat-icon>payment</mat-icon>
+              </div>
+              <div class="activity-content">
+                <p class="activity-title">Paiement reçu pour Commande #4562</p>
+                <p class="activity-desc">Montant: 1,245.00€</p>
+                <span class="activity-time">Il y a 2 heures</span>
+              </div>
+            </div>
+          </div>
+        </mat-card>
+
+        <!-- Low Stock -->
+        <mat-card class="activity-card">
+          <div class="card-header">
+            <h3>Stock Faible</h3>
+            <button mat-button color="primary">Gérer le Stock</button>
+          </div>
+          <div class="stock-list">
+            <div class="stock-item">
+              <div class="stock-info">
+                <h4>Écrans LED 24"</h4>
+                <p>Informatique • 5 unités</p>
+              </div>
+              <div class="stock-progress">
+                <mat-progress-bar mode="determinate" value="15" class="danger"></mat-progress-bar>
+                <span>15%</span>
+              </div>
+              <button mat-button color="primary" class="stock-action">
+                Commander
+              </button>
+            </div>
+
+            <div class="stock-item">
+              <div class="stock-info">
+                <h4>Souris Sans Fil</h4>
+                <p>Périphériques • 3 unités</p>
+              </div>
+              <div class="stock-progress">
+                <mat-progress-bar mode="determinate" value="10" class="danger"></mat-progress-bar>
+                <span>10%</span>
+              </div>
+              <button mat-button color="primary" class="stock-action">
+                Commander
+              </button>
+            </div>
+
+            <div class="stock-item">
+              <div class="stock-info">
+                <h4>Claviers Mécaniques</h4>
+                <p>Périphériques • 7 unités</p>
+              </div>
+              <div class="stock-progress">
+                <mat-progress-bar mode="determinate" value="20" class="warning"></mat-progress-bar>
+                <span>20%</span>
+              </div>
+              <button mat-button color="primary" class="stock-action">
+                Commander
+              </button>
+            </div>
+
+            <div class="stock-item">
+              <div class="stock-info">
+                <h4>Disques Durs SSD</h4>
+                <p>Composants • 4 unités</p>
+              </div>
+              <div class="stock-progress">
+                <mat-progress-bar mode="determinate" value="12" class="danger"></mat-progress-bar>
+                <span>12%</span>
+              </div>
+              <button mat-button color="primary" class="stock-action">
+                Commander
+              </button>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+    </main>
+  </div>
+  <app-footer></app-footer>
+</div>

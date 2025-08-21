@@ -1,0 +1,55 @@
+<!-- sidebar.component.html -->
+<aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-mini">
+        <mat-icon>inventory</mat-icon>
+      </div>
+      <span class="app-name">StockPro</span>
+    </div>
+  
+    <nav class="sidebar-nav">
+      <div class="nav-scroll-container">
+        <ul>
+          @for (item of navItems(); track item.label) {
+            <li class="nav-item" [class.active]="item.isActive" [class.expanded]="item.isExpanded">
+              @if (item.children) {
+                <div class="nav-parent" (click)="toggleItem(item)">
+                  <div class="nav-content">
+                    <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+                    <span class="nav-label">{{ item.label }}</span>
+                  </div>
+                  <mat-icon class="expand-icon">
+                    {{ item.isExpanded ? 'expand_less' : 'expand_more' }}
+                  </mat-icon>
+                </div>
+                
+                @if (item.isExpanded) {
+                  <div class="submenu">
+                    @for (child of item.children; track child.label) {
+                      <a 
+                        [routerLink]="child.route" 
+                        class="submenu-item" 
+                        [class.active]="child.isActive"
+                        (click)="selectChildItem(item.label, child)">
+                        <mat-icon class="submenu-icon">{{ child.icon }}</mat-icon>
+                        <span>{{ child.label }}</span>
+                      </a>
+                    }
+                  </div>
+                }
+              } @else {
+                <a 
+                  [routerLink]="item.route" 
+                  class="nav-link" 
+                  (click)="toggleItem(item)">
+                  <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+                  <span class="nav-label">{{ item.label }}</span>
+                </a>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    </nav>
+    
+  </aside>
