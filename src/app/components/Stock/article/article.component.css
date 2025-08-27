@@ -1,0 +1,441 @@
+/* articles.component.css */
+.articles-container {
+    min-height: 100vh;
+    background-color: #f8fafc;
+  }
+  
+  .articles-content {
+    display: flex;
+    min-height: calc(100vh - 80px);
+  }
+  
+  .main-panel {
+    flex: 1;
+    padding: 2rem;
+    margin-left: 250px;
+    background-color: #f8fafc;
+    transition: margin-left 0.3s ease;
+  }
+  
+  /* Page Header */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .header-content h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  
+  .header-content p {
+    margin: 0.5rem 0 0;
+    color: #64748b;
+    font-size: 1.1rem;
+  }
+  
+  .add-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  
+  /* Form Card */
+  .form-card, .list-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 2rem;
+    background: white;
+  }
+  
+  .form-card mat-card-header {
+    padding: 1.5rem 1.5rem 0;
+  }
+  
+  .form-card mat-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  
+  .article-form {
+    padding: 1.5rem;
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .form-field {
+    width: 100%;
+  }
+  
+  .image-upload {
+    border: 2px dashed #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: border-color 0.3s ease;
+  }
+  
+  .image-upload:hover {
+    border-color: #3b82f6;
+  }
+  
+  .upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    cursor: pointer;
+  }
+  
+  .upload-label mat-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+    color: #94a3b8;
+  }
+  
+  .file-input {
+    display: none;
+  }
+  
+  .image-preview {
+    position: relative;
+    margin-top: 1rem;
+    display: inline-block;
+  }
+  
+  .image-preview img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+  }
+  
+  .remove-image {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .cancel-button {
+    color: #64748b;
+  }
+  
+  /* List Card */
+  .list-card mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 0;
+  }
+  
+  .total-count {
+    color: #64748b;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+  
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #64748b;
+  }
+  
+  .empty-state mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  .empty-state h3 {
+    margin: 0 0 0.5rem;
+    color: #2c3e50;
+  }
+  
+  .empty-state p {
+    margin: 0;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .articles-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .articles-table th {
+    background-color: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  
+  .articles-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+  }
+  
+  .code-cell {
+    height: 5em;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #3b82f6;
+    font-family: 'Courier New', monospace;
+  }
+  
+  .code-cell mat-icon {
+    color: #3b82f6;
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  .designation-cell .article-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .article-image {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .categorie-cell mat-chip {
+    background-color: #e0f2fe;
+    color: #0ea5e9;
+  }
+  
+  .prix-cell .price-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .price-ttc {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1rem;
+  }
+  
+  .price-ht {
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+  
+  .stock-cell .stock-status {
+    padding: 0.25rem 0.75rem;
+    background-color: #dcfce7;
+    color: #16a34a;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .actions-cell {
+    white-space: nowrap;
+  }
+  
+  .actions-cell button {
+    margin: 0 0.25rem;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .main-panel {
+      margin-left: 80px;
+      padding: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .main-panel {
+      margin-left: 0;
+      margin-top: 80px;
+      padding: 1rem;
+      margin-bottom: 60px;
+    }
+    
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .add-button {
+      align-self: stretch;
+    }
+    
+    .articles-table {
+      min-width: 800px;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+  }
+  
+  /* Success and Error Snackbars */
+  ::ng-deep .success-snackbar {
+    background-color: #10b981 !important;
+    color: white !important;
+  }
+  
+  ::ng-deep .error-snackbar {
+    background-color: #ef4444 !important;
+    color: white !important;
+  }
+
+  /* Add these styles to the existing CSS */
+.filter-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 2rem;
+  background: white;
+}
+
+.filter-card mat-card-header {
+  padding: 1.5rem 1.5rem 0;
+}
+
+.filter-card mat-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.filter-container {
+  padding: 1.5rem;
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 1rem;
+ /* align-items: end;*/
+  margin-bottom: 1rem;
+}
+
+.filter-field {
+  width: 100%;
+}
+
+.clear-filters-btn {
+  white-space: nowrap;
+  height: 56px; /* Match input field height */
+}
+
+.filter-results {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.filter-results mat-icon {
+  color: #3b82f6;
+}
+
+.filter-tag {
+  background-color: #e0f2fe;
+  color: #0ea5e9;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin: 0 0.25rem;
+  font-weight: 500;
+}
+
+/* Responsive design for filters */
+@media (max-width: 992px) {
+  .filter-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .clear-filters-btn {
+    grid-column: span 2;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .clear-filters-btn {
+    grid-column: span 1;
+    justify-self: stretch;
+  }
+  
+  .filter-results {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}

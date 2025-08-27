@@ -1,0 +1,126 @@
+<!-- depots.component.html -->
+<div class="depots-container">
+    <app-header></app-header>
+    
+    <div class="depots-content">
+      <app-sidebar></app-sidebar>
+  
+      <main class="main-panel">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="header-content">
+            <h1>Gestion des Dépôts</h1>
+            <p>Créez et gérez vos dépôts de stockage</p>
+          </div>
+        </div>
+  
+        <!-- Depot Form -->
+        <mat-card class="form-card">
+          <mat-card-header>
+            <mat-card-title>
+              {{ isEditing() ? 'Modifier le Dépôt' : 'Ajouter un Nouveau Dépôt' }}
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="depotForm" (ngSubmit)="onSubmit()" class="depot-form">
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Nom du Dépôt</mat-label>
+                  <input matInput formControlName="nom" placeholder="Entrez le nom du dépôt">
+                  <mat-icon matSuffix>store</mat-icon>
+                  <mat-error *ngIf="depotForm.get('nom')?.hasError('required')">
+                    Le nom est requis
+                  </mat-error>
+                  <mat-error *ngIf="depotForm.get('nom')?.hasError('minlength')">
+                    Le nom doit contenir au moins 5 caractères
+                  </mat-error>
+                </mat-form-field>
+  
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput formControlName="description" placeholder="Décrivez le dépôt" rows="3"></textarea>
+                  <mat-icon matSuffix>description</mat-icon>
+                </mat-form-field>
+              </div>
+  
+              <div class="form-actions">
+                <button mat-button type="button" (click)="resetForm()" class="cancel-button">
+                  Annuler
+                </button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="depotForm.invalid || isLoading()">
+                  <span *ngIf="!isLoading()">
+                    {{ isEditing() ? 'Modifier' : 'Créer' }}
+                  </span>
+                  <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+  
+        <!-- Depots List -->
+        <mat-card class="list-card">
+          <mat-card-header>
+            <mat-card-title>Liste des Dépôts</mat-card-title>
+            <span class="total-count">{{ depots().length }} dépôt(s)</span>
+          </mat-card-header>
+          <mat-card-content>
+            @if (isLoading()) {
+              <div class="loading-spinner">
+                <mat-spinner diameter="40"></mat-spinner>
+              </div>
+            } @else if (depots().length === 0) {
+              <div class="empty-state">
+                <mat-icon>inventory</mat-icon>
+                <h3>Aucun dépôt trouvé</h3>
+                <p>Commencez par créer votre premier dépôt</p>
+              </div>
+            } @else {
+              <div class="table-container">
+                <table mat-table [dataSource]="depots()" class="depots-table">
+                  <!-- ID Column -->
+                  <ng-container matColumnDef="id">
+                    <th mat-header-cell *matHeaderCellDef>ID</th>
+                    <td mat-cell *matCellDef="let depot" class="id-cell">#{{ depot.id }}</td>
+                  </ng-container>
+  
+                  <!-- Nom Column -->
+                  <ng-container matColumnDef="nom">
+                    <th mat-header-cell *matHeaderCellDef>Nom</th>
+                    <td mat-cell *matCellDef="let depot" class="name-cell">
+                      <mat-icon>store</mat-icon>
+                      {{ depot.nom }}
+                    </td>
+                  </ng-container>
+  
+                  <!-- Description Column -->
+                  <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef>Description</th>
+                    <td mat-cell *matCellDef="let depot" class="description-cell">
+                      {{ depot.description }}
+                    </td>
+                  </ng-container>
+  
+                  <!-- Actions Column -->
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let depot" class="actions-cell">
+                      <button mat-icon-button color="primary" (click)="onEdit(depot)" title="Modifier">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="onDelete(depot)" title="Supprimer">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+  
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </main>
+    </div>
+  </div>

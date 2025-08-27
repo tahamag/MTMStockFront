@@ -1,0 +1,308 @@
+<!-- articles.component.html -->
+<div class="articles-container">
+    <app-header></app-header>
+    
+    <div class="articles-content">
+      <app-sidebar></app-sidebar>
+  
+      <main class="main-panel">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="header-content">
+            <h1>Gestion des Articles</h1>
+            <p>Créez et gérez votre catalogue d'articles</p>
+          </div>
+          <button mat-raised-button color="primary" class="add-button" (click)="resetForm()">
+            <mat-icon>add</mat-icon>
+            Nouvel Article
+          </button>
+        </div>
+  
+        <!-- Article Form -->
+        <mat-card class="form-card">
+          <mat-card-header>
+            <mat-card-title>
+              {{ isEditing() ? 'Modifier l\'Article' : 'Ajouter un Nouvel Article' }}
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="articleForm" (ngSubmit)="onSubmit()" class="article-form" enctype="multipart/form-data">
+              <div class="form-grid">
+                <!-- Left Column -->
+                <div class="form-column">
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Code Article</mat-label>
+                      <input matInput formControlName="code" placeholder="Ex: ART-001">
+                      <mat-icon matSuffix>code</mat-icon>
+                    </mat-form-field>
+                  </div>
+  
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Catégorie</mat-label>
+                      <mat-select formControlName="id_categorie">
+                        <mat-option *ngFor="let categorie of categories()" [value]="categorie.id">
+                          {{ categorie.nom }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-icon matSuffix>category</mat-icon>
+                      <mat-error *ngIf="articleForm.get('id_categorie')?.hasError('required')">
+                        La catégorie est requise
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+  
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Désignation</mat-label>
+                      <input matInput formControlName="designation" placeholder="Nom de l'article">
+                      <mat-icon matSuffix>title</mat-icon>
+                      <mat-error *ngIf="articleForm.get('designation')?.hasError('required')">
+                        La désignation est requise
+                      </mat-error>
+                      <mat-error *ngIf="articleForm.get('designation')?.hasError('minlength')">
+                        La désignation doit contenir au moins 3 caractères
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+  
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Description</mat-label>
+                      <textarea matInput formControlName="description" placeholder="Description détaillée" rows="4"></textarea>
+                      <mat-icon matSuffix>description</mat-icon>
+                    </mat-form-field>
+                  </div>
+                </div>
+  
+                <!-- Right Column -->
+                <div class="form-column">
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Prix d'Achat HT</mat-label>
+                      <input matInput type="number" formControlName="prixA_HT" placeholder="0.00" (blur)="calculateTTC()">
+                      
+                      <mat-icon matSuffix>DH</mat-icon>
+                    </mat-form-field>
+                  </div>
+  
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>TVA (%)</mat-label>
+                      <input matInput type="number" formControlName="tva" placeholder="20" (blur)="calculateTTC()">
+                      <span matSuffix>%</span>
+                      <mat-icon matSuffix>percent</mat-icon>
+                    </mat-form-field>
+                  </div>
+  
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Prix d'Achat TTC</mat-label>
+                      <input matInput type="number" formControlName="prixA_TTC" placeholder="0.00" readonly>
+                      
+                      <mat-icon matSuffix>DH</mat-icon>
+                    </mat-form-field>
+                  </div>
+  
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Prix de Vente HT</mat-label>
+                      <input matInput type="number" formControlName="prixV_HT" placeholder="0.00" (blur)="calculateTTC()">
+                      
+                      <mat-icon matSuffix>DH</mat-icon>
+                    </mat-form-field>
+                  </div>
+  
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Prix de Vente TTC</mat-label>
+                      <input matInput type="number" formControlName="prixV_TTC" placeholder="0.00" readonly>
+                      
+                      <mat-icon matSuffix>DH</mat-icon>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+  
+              <div class="form-actions">
+                <button mat-button type="button" (click)="resetForm()" class="cancel-button">
+                  Annuler
+                </button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="articleForm.invalid || isLoading()">
+                  <span *ngIf="!isLoading()">
+                    {{ isEditing() ? 'Modifier' : 'Créer' }}
+                  </span>
+                  <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+  
+        <!-- Articles List -->
+        <mat-card class="list-card">
+          <mat-card-header>
+            <mat-card-title>Liste des Articles</mat-card-title>
+            <span class="total-count">{{ articles().length }} article(s)</span>
+          </mat-card-header>
+          <mat-card class="filter-card">
+            <mat-card-header>
+              <mat-card-title>Filtres</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="filter-container">
+                <div class="filter-row">
+                  <!-- Name Filter -->
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Rechercher par nom ou code</mat-label>
+                    <input 
+                      matInput 
+                      [value]="filterName()" 
+                      (input)="onNameFilterChange($event)"
+                      placeholder="Entrez le nom ou code de l'article"
+                    >
+                    <mat-icon matSuffix>search</mat-icon>
+                  </mat-form-field>
+
+                  <!-- Category Filter -->
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Filtrer par catégorie</mat-label>
+                    <mat-select [value]="filterCategory()" (selectionChange)="onCategoryFilterChange($event)">
+                      <mat-option value="">Toutes les catégories</mat-option>
+                      <mat-option *ngFor="let categorie of categories()" [value]="categorie.id.toString()">
+                        {{ categorie.nom }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>category</mat-icon>
+                  </mat-form-field>
+
+                  <!-- Clear Filters Button -->
+                  <button 
+                    mat-stroked-button 
+                    color="warn" 
+                    (click)="clearFilters()"
+                    class="clear-filters-btn"
+                    [disabled]="!filterName() && !filterCategory()"
+                  >
+                    <mat-icon>clear</mat-icon>
+                    Effacer les filtres
+                  </button>
+                </div>
+
+                <!-- Filter Results Info -->
+                <div class="filter-results" *ngIf="filterName() || filterCategory()">
+                  <mat-icon>filter_list</mat-icon>
+                  <span>
+                    Filtrage actif: 
+                    <span *ngIf="filterName()" class="filter-tag">
+                      Nom: "{{ filterName() }}"
+                    </span>
+                    <span *ngIf="filterCategory()" class="filter-tag">
+                      Catégorie: {{ filterCategory() }}
+                    </span>
+                    - {{ filteredArticles().length }} article(s) trouvé(s)
+                  </span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card-content>
+            @if (isLoading()) {
+              <div class="loading-spinner">
+                <mat-spinner diameter="40"></mat-spinner>
+              </div>
+            } @else if (filteredArticles().length === 0) {
+              <div class="empty-state">
+                @if (filterName() || filterCategory()) {
+                  <mat-icon>search_off</mat-icon>
+                  <h3>Aucun article ne correspond aux filtres</h3>
+                  <p>Essayez de modifier vos critères de recherche</p>
+                  <button mat-button color="primary" (click)="clearFilters()">
+                    Afficher tous les articles
+                  </button>
+                } @else {
+                  <mat-icon>inventory_2</mat-icon>
+                  <h3>Aucun article trouvé</h3>
+                  <p>Commencez par créer votre premier article</p>
+                }
+              </div>
+            } @else {
+              <div class="table-container">
+                <!-- Add this filter section after the form card and before the list card -->
+                <table mat-table [dataSource]="filteredArticles()" class="articles-table">
+                  <!-- Code Column -->
+                  <ng-container matColumnDef="code">
+                    <th mat-header-cell *matHeaderCellDef>Code</th>
+                    <td mat-cell *matCellDef="let article" class="code-cell">
+                      {{ article.code }}
+                    </td>
+                  </ng-container>
+  
+                  <!-- Designation Column -->
+                  <ng-container matColumnDef="designation">
+                    <th mat-header-cell *matHeaderCellDef>Désignation</th>
+                    <td mat-cell *matCellDef="let article" class="designation-cell">
+                      <div class="article-info">
+                        @if (article.image) {
+                          <img [src]="article.image" alt="{{ article.designation }}" class="article-image">
+                        }
+                        <span>{{ article.designation }}</span>
+                      </div>
+                    </td>
+                  </ng-container>
+  
+                  <!-- Categorie Column -->
+                  <ng-container matColumnDef="categorie">
+                    <th mat-header-cell *matHeaderCellDef>Catégorie</th>
+                    <td mat-cell *matCellDef="let article" class="categorie-cell">
+                      <mat-chip>{{ article.categorie.nom ?? 'sans' }}</mat-chip>
+                    </td>
+                  </ng-container>
+  
+                  <!-- Prix Column vente -->
+                  <ng-container matColumnDef="prixV">
+                    <th mat-header-cell *matHeaderCellDef>Prix de Vente</th>
+                    <td mat-cell *matCellDef="let article" class="prix-cell">
+                      <div class="price-info">
+                        <span class="price-ttc">{{ article.prixV_TTC }} dh TTC</span>
+                        <span class="price-ht">{{ article.prixV_HT }} dh HT</span>
+                      </div>
+                    </td>
+                  </ng-container>
+  
+                  
+                  <!-- Prix Column Achat -->
+                  <ng-container matColumnDef="prixA">
+                    <th mat-header-cell *matHeaderCellDef>Prix d'Achat</th>
+                    <td mat-cell *matCellDef="let article" class="prix-cell">
+                      <div class="price-info">
+                        <span class="price-ttc">{{ article.prixA_TTC }} dh TTC</span>
+                        <span class="price-ht">{{ article.prixA_HT }} dh HT</span>
+                      </div>
+                    </td>
+                  </ng-container>
+  
+                  <!-- Actions Column -->
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let article" class="actions-cell">
+                      <button mat-icon-button color="primary" (click)="onEdit(article)" title="Modifier">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="onDelete(article)" title="Supprimer">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+  
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </main>
+    </div>
+  </div>

@@ -1,0 +1,370 @@
+<div class="commandes-container">
+    <app-header></app-header>
+
+    <div class="commandes-content">
+        <app-sidebar></app-sidebar>
+
+        <main class="main-panel">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-content">
+            <h1>Commandes Clients</h1>
+            <p>Gérez les commandes de vos clients</p>
+            </div>
+            <div class="header-actions">
+              <button mat-raised-button color="primary" class="add-button" (click)="resetForm()">
+                <mat-icon>add</mat-icon>
+                Nouvelle Commande
+              </button>
+            </div>
+        </div>
+
+        <!-- Commande Form -->
+        <mat-card class="form-card">
+            
+            <mat-card-header>
+                <mat-card-title>
+                    {{ isEditing() ? 'Modifier la Commande' : 'Nouvelle Commande Client' }}
+                </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                <form [formGroup]="commandeForm" (ngSubmit)="onSubmit()" class="commande-form">
+                    <div class="form-grid">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                        <mat-form-field appearance="outline" class="form-field">
+                            <mat-label>Date Commande</mat-label>
+                            <input matInput [matDatepicker]="picker" formControlName="dateCommande">
+                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker>
+                            <mat-error *ngIf="commandeForm.get('dateCommande')?.hasError('required')">
+                            La date est requise
+                            </mat-error>
+                        </mat-form-field>
+                        </div>
+    
+                        <div class="form-group">
+                        <mat-form-field appearance="outline" class="form-field">
+                            <mat-label>Client</mat-label>
+                            <mat-select formControlName="client">
+                                <mat-option *ngFor="let client of clients()" [value]="client.id">
+                                    {{ client.nomComplet }} 
+                                    <span *ngIf="client.email">- {{ client.email }}</span>
+                                </mat-option>
+                            </mat-select>
+                            <mat-icon matSuffix>person</mat-icon>
+                            <mat-error *ngIf="commandeForm.get('client')?.hasError('required')">
+                            Le client est requis
+                            </mat-error>
+                        </mat-form-field>
+                        </div>
+                    </div>
+    
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <div class="total-section">
+                        <div class="total-card">
+                            <mat-icon class="total-icon">euro</mat-icon>
+                            <div class="total-content">
+                            <h3>Total: {{ commandeForm.get('montantTotal')?.value | currency:'EUR':'symbol':'1.2-2' }}</h3>
+                            <p>{{ lignes.length }} article(s) dans la commande</p>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+    
+                    <!-- Lignes de Commande -->
+                    <div class="lignes-section">
+                    <div class="section-header">
+                        <h3>Articles de la commande</h3>
+                        <button mat-button color="primary" type="button" (click)="addLigne()">
+                        <mat-icon>add</mat-icon>
+                        Ajouter un article
+                        </button>
+                    </div>
+    
+                    <div formArrayName="lignes" class="lignes-container">
+                        <div *ngFor="let ligne of lignes.controls; let i = index" [formGroupName]="i" class="ligne-item">
+                        <div class="ligne-content">
+                            <mat-form-field appearance="outline" class="ligne-field article-field">
+                            <mat-label>Article</mat-label>
+                            <mat-select formControlName="id_Article" (selectionChange)="onArticleChange(i, $event.value)">
+                                <mat-option *ngFor="let article of articles()" [value]="article.id">
+                                {{ article.designation }} 
+                                <span *ngIf="article.code">({{ article.code }})</span>
+                                - {{ article.prixV_TTC | currency:'EUR':'symbol':'1.2-2' }} TTC
+                                </mat-option>
+                            </mat-select>
+                            </mat-form-field>
+    
+                            <mat-form-field appearance="outline" class="ligne-field quantite-field">
+                            <mat-label>Quantité</mat-label>
+                            <input matInput type="number" formControlName="quantite" (change)="onquantiteChange(i)" min="1">
+                            </mat-form-field>
+    
+                            <mat-form-field appearance="outline" class="ligne-field prix-field">
+                            <mat-label>Prix HT</mat-label>
+                            <input matInput type="number" formControlName="Prix_HT" (change)="onquantiteChange(i)">
+                            <span matPrefix>dh&nbsp;</span>
+                            </mat-form-field>
+    
+                            <mat-form-field appearance="outline" class="ligne-field tva-field">
+                            <mat-label>TVA</mat-label>
+                            <input matInput type="number" formControlName="TVA" (change)="onquantiteChange(i)">
+                            <span matSuffix>%</span>
+                            </mat-form-field>
+    
+                            <mat-form-field appearance="outline" class="ligne-field prix-field">
+                            <mat-label>Prix TTC</mat-label>
+                            <input matInput type="number" formControlName="Prix_TTC" readonly>
+                            <span matPrefix>dh&nbsp;</span>
+                            </mat-form-field>
+    
+                            <mat-form-field appearance="outline" class="ligne-field total-field">
+                            <mat-label>Total TTC</mat-label>
+                            <input matInput type="number" formControlName="MontantTTC" readonly>
+                            <span matPrefix>dh&nbsp;</span>
+                            </mat-form-field>
+    
+                            <button mat-icon-button color="warn" type="button" (click)="removeLigne(i)" class="remove-btn">
+                            <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                        
+                        <!-- Article details -->
+                        <div *ngIf="ligne.value.article" class="article-details">
+                            <small>
+                            <span class="detail-item">Catégorie: {{ ligne.value.article.categorie.nom }}</span> | 
+                            <span class="detail-item">Stock: {{ ligne.value.article.stock || 0 }}</span> |
+                            <span class="detail-item">Ref: {{ ligne.value.article.code }}</span>
+                            </small>
+                        </div>
+                        </div>
+                    </div>
+    
+                    <div *ngIf="lignes.length === 0" class="no-lignes">
+                        <mat-icon>inventory_2</mat-icon>
+                        <p>Aucun article ajouté à la commande</p>
+                    </div>
+                    </div>
+    
+                    <div class="form-actions">
+                    <button mat-button type="button" (click)="resetForm()" class="cancel-button">
+                        Annuler
+                    </button>
+                    <button mat-raised-button color="primary" type="submit" 
+                            [disabled]="commandeForm.invalid || lignes.length === 0 || isLoading()">
+                        <span *ngIf="!isLoading()">
+                        {{ isEditing() ? 'Modifier' : 'Créer' }} la Commande
+                        </span>
+                        <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+                    </button>
+                    </div>
+                </form>
+                </mat-card-content>
+        </mat-card>
+
+        <!-- Commandes List -->
+        
+        <!-- Filter Panel -->
+        
+        <div class="filter-panel" [class.expanded]="showFilters()">
+            <form  class="filter-form">
+                <div class="filter-grid">
+                    
+                <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Code commande</mat-label>
+                    <input matInput  placeholder="Rechercher par code"
+                    (input)="onCodeFilterChange($event)">
+                    <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Client</mat-label>
+                    <mat-select (selectionChange)="onClientFilterChange($event)">
+                        <mat-option value="-1">Tous les clients</mat-option>
+                        <mat-option *ngFor="let client of clients()" [value]="client.id">
+                            {{ client.nomComplet }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>person</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Date début</mat-label>
+                    <input matInput [matDatepicker]="dateDebutPicker" 
+                    (dateChange)="onDateDebutFilterChange($event)">
+                    <mat-datepicker-toggle matSuffix [for]="dateDebutPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #dateDebutPicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Date fin</mat-label>
+                    <input matInput [matDatepicker]="dateFinPicker"
+                    (dateChange)="onDateFinFilterChange($event)">
+                    <mat-datepicker-toggle matSuffix [for]="dateFinPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #dateFinPicker></mat-datepicker>
+                </mat-form-field>
+                </div>
+
+                <div class="filter-actions">
+                <button mat-button type="button" (click)="clearFilters()" [disabled]="!hasActiveFilters()">
+                    Réinitialiser
+                </button>
+                </div>
+            </form>
+        </div>
+
+        <mat-card class="list-card">
+            <mat-card-header>
+                <mat-card-title>Liste des Commandes</mat-card-title>
+                <span class="total-count">{{ filteredCommandes().length }} commande(s)</span>
+                <button mat-stroked-button color="primary" class="filter-button" (click)="toggleFilters()">
+                    <mat-icon>filter_list</mat-icon>
+                        Filtres
+                    <span *ngIf="hasActiveFilters()" class="filter-badge"></span>
+                </button>
+            </mat-card-header>
+            <mat-card-content>
+            @if (isLoading()) {
+                <div class="loading-spinner">
+                <mat-spinner diameter="40"></mat-spinner>
+                </div>
+            } @else if (commandes().length === 0) {
+                <div class="empty-state">
+                <mat-icon>receipt</mat-icon>
+                <h3>Aucune commande trouvée</h3>
+                <p>Commencez par créer votre première commande</p>
+                </div>
+            } @else if (filteredCommandes().length === 0) {
+                <div class="empty-state">
+                <mat-icon>search_off</mat-icon>
+                <h3>Aucune commande ne correspond aux filtres</h3>
+                <p>Modifiez vos critères de recherche</p>
+                </div>
+            } @else {
+                <div class="table-container">
+                <table mat-table [dataSource]="filteredCommandes()" class="commandes-table" multiTemplateDataRows>
+                        <!-- Expand Column -->
+                        <ng-container matColumnDef="expand">
+                        <th mat-header-cell *matHeaderCellDef aria-label="row actions"></th>
+                        <td mat-cell *matCellDef="let commande">
+                            <button mat-icon-button (click)="toggleCommandeDetails(commande)" aria-label="Expand row">
+                            <mat-icon *ngIf="!isCommandeExpanded(commande)">keyboard_arrow_down</mat-icon>
+                            <mat-icon *ngIf="isCommandeExpanded(commande)">keyboard_arrow_up</mat-icon>
+                            </button>
+                        </td>
+                        </ng-container>
+
+                        <!-- Code Column -->
+                        <ng-container matColumnDef="code">
+                        <th mat-header-cell *matHeaderCellDef>Code</th>
+                        <td mat-cell *matCellDef="let commande" class="code-cell">
+                            <mat-icon>receipt</mat-icon>
+                            {{ commande.code }}
+                        </td>
+                        </ng-container>
+
+                        <!-- Client Column -->
+                        <ng-container matColumnDef="client">
+                        <th mat-header-cell *matHeaderCellDef>Client</th>
+                        <td mat-cell *matCellDef="let commande" class="client-cell">
+                            <div class="client-info">
+                            <mat-icon>person</mat-icon>
+                            <span>{{ commande.client.nomComplet }}</span>
+                            </div>
+                            <small *ngIf="commande.client.email">{{ commande.client.email }}</small>
+                        </td>
+                        </ng-container>
+
+                        <!-- Date Column -->
+                        <ng-container matColumnDef="date">
+                        <th mat-header-cell *matHeaderCellDef>Date</th>
+                        <td mat-cell *matCellDef="let commande" class="date-cell">
+                            {{ commande.dateCommande | date:'dd/MM/yyyy' }}
+                        </td>
+                        </ng-container>
+
+                        <!-- Montant Column -->
+                        <ng-container matColumnDef="montant">
+                        <th mat-header-cell *matHeaderCellDef>Montant</th>
+                        <td mat-cell *matCellDef="let commande" class="montant-cell">
+                            <span class="montant-value">{{ commande.montantTotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+                        </td>
+                        </ng-container>
+
+                        <!-- Actions Column -->
+                        <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef>Actions</th>
+                        <td mat-cell *matCellDef="let commande" class="actions-cell">
+                            <button mat-icon-button color="primary" (click)="onEdit(commande)" title="Modifier">
+                            <mat-icon>edit</mat-icon>
+                            </button>
+                            <button mat-icon-button color="warn" (click)="onDelete(commande)" title="Supprimer">
+                            <mat-icon>delete</mat-icon>
+                            </button>
+                        </td>
+                        </ng-container>
+
+                        <!-- Expanded Content Column - The detail row is made up of this one column -->
+                        <ng-container matColumnDef="expandedDetail">
+                        <td mat-cell *matCellDef="let commande" [attr.colspan]="displayedColumns.length">
+                            <div class="commande-detail" [class.expanded]="isCommandeExpanded(commande)">
+                            <div class="detail-header">
+                                <h4>Détails de la commande</h4>
+                                <span class="article-count">{{ commande.lignes.length }} article(s)</span>
+                            </div>
+                            
+                            <div class="lignes-table">
+                                <div class="ligne-header">
+                                <span class="ligne-col article">Article</span>
+                                <span class="ligne-col quantity">Quantité</span>
+                                <span class="ligne-col price">Prix HT</span>
+                                <span class="ligne-col tva">TVA</span>
+                                <span class="ligne-col price">Prix TTC</span>
+                                <span class="ligne-col total">Total TTC</span>
+                                </div>
+                                
+                                <div class="ligne-row" *ngFor="let ligne of commande.lignes">
+                                <span class="ligne-col article">
+                                    <strong>{{ getArticleName(ligne.id_Article) }}</strong>
+                                    <small *ngIf="ligne.article?.code">({{ ligne.article.code }})</small>
+                                </span>
+                                <span class="ligne-col quantity">{{ ligne.quantite }}</span>
+                                <span class="ligne-col price">{{ ligne.prix_HT | currency:'EUR':'symbol':'1.2-2' }}</span>
+                                <span class="ligne-col tva">{{ ligne.tva }} %</span>
+                                <span class="ligne-col price">{{ ligne.prix_TTC | currency:'EUR':'symbol':'1.2-2' }}</span>
+                                <span class="ligne-col total">{{ ligne.montantTTC | currency:'EUR':'symbol':'1.2-2' }}</span>
+                                </div>
+                                
+                                <div class="ligne-total">
+                                <span class="ligne-col article"></span>
+                                <span class="ligne-col quantity"></span>
+                                <span class="ligne-col price"></span>
+                                <span class="ligne-col tva"></span>
+                                <span class="ligne-col price"><strong>Total:</strong></span>
+                                <span class="ligne-col total"><strong>{{ commande.montantTotal | currency:'EUR':'symbol':'1.2-2' }}</strong></span>
+                                </div>
+                            </div>
+                            </div>
+                        </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+                            class="commande-row"
+                            [class.expanded]="isCommandeExpanded(row)">
+                        </tr>
+                        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+                    
+                </table>
+                </div>
+            }
+            </mat-card-content>
+        </mat-card>
+    
+        </main>
+    </div>
+</div>
