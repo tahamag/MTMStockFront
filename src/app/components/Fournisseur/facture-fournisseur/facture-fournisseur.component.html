@@ -1,0 +1,390 @@
+<div class="commandes-container">
+    <app-header></app-header>
+
+    <div class="commandes-content">
+        <app-sidebar></app-sidebar>
+
+        <main class="main-panel">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-content">
+            <h1>facture</h1>
+            <p>Gérez les facture de vos fournisseurs</p>
+            </div>
+            <div class="header-actions">
+              <button mat-raised-button color="primary" class="add-button" (click)="resetForm()">
+                <mat-icon>add</mat-icon>
+                Nouveau facture
+              </button>
+            </div>
+        </div>
+
+        <!-- Transaction Form -->
+        <mat-card class="form-card">
+            <mat-card-header>
+                <mat-card-title>
+                    {{ isEditing() ? 'Modifier la facture' : 'Nouveau facture' }}
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <form [formGroup]="factureForm" (ngSubmit)="onSubmit()" class="commande-form">
+                    <div class="form-grid">
+                        <!-- Left Column -->
+                        <div class="form-column">
+
+                            <div class="form-group">
+                                <mat-form-field appearance="outline" class="form-field">
+                                    <mat-label>{{ 'fournisseurs'}}</mat-label>
+                                    <mat-select formControlName="Id_intervenant">
+                                        <mat-option *ngFor="let intervenant of fournisseurs()" [value]="intervenant.id">
+                                            {{ intervenant.nomComplet }}
+                                            <span *ngIf="intervenant.email">- {{ intervenant.email }}</span>
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-icon matSuffix>person</mat-icon>
+                                    <mat-error *ngIf="factureForm.get('Id_intervenant')?.hasError('required')">
+                                        {{ 'Le fournisseur' }} est requis
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-group">
+                                <mat-form-field appearance="outline" class="form-field">
+                                    <mat-label>Dépôt</mat-label>
+                                    <mat-select formControlName="id_depot">
+                                        <mat-option *ngFor="let depot of depots()" [value]="depot.id">
+                                            {{ depot.nom }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-icon matSuffix>store</mat-icon>
+                                    <mat-error *ngIf="factureForm.get('id_depot')?.hasError('required')">
+                                        Le dépôt est requis
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-group">
+                                <mat-form-field appearance="outline" class="form-field">
+                                    <mat-label>Date Livraison</mat-label>
+                                    <input matInput [matDatepicker]="picker" formControlName="dateFacture">
+                                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                    <mat-datepicker #picker></mat-datepicker>
+                                    <mat-error *ngIf="factureForm.get('dateFacture')?.hasError('required')">
+                                        La date est requise
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="form-column">
+                            <div class="total-section">
+                                <div class="total-card">
+                                    <mat-icon class="total-icon">euro</mat-icon>
+                                    <div class="total-content">
+                                        <h3>Total: {{ factureForm.get('montantTotal')?.value | currency:'EUR':'symbol':'1.2-2' }}</h3>
+                                        <p>{{ lignes.length }} article(s) dans la facture</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lignes de Transaction -->
+                    <div class="lignes-section">
+                        <div class="section-header">
+                            <h3>Articles du facture</h3>
+                            <button mat-button color="primary" type="button" (click)="addLigne()">
+                                <mat-icon>add</mat-icon>
+                                Ajouter un article
+                            </button>
+                        </div>
+
+                        <div formArrayName="lignes" class="lignes-container">
+                            <div *ngFor="let ligne of lignes.controls; let i = index" [formGroupName]="i" class="ligne-item">
+                                <div class="ligne-content">
+                                    <mat-form-field appearance="outline" class="ligne-field article-field">
+                                        <mat-label>Article</mat-label>
+                                        <mat-select formControlName="id_Article" (selectionChange)="onArticleChange(i, $event.value)">
+                                            <mat-option *ngFor="let article of articles()" [value]="article.id">
+                                                {{ article.designation }}
+                                                <span *ngIf="article.code">({{ article.code }})</span>
+                                                - {{ article.prixV_TTC | currency:'EUR':'symbol':'1.2-2' }} TTC
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="ligne-field quantite-field">
+                                        <mat-label>Quantité</mat-label>
+                                        <input matInput type="number" formControlName="quantite" (change)="onQuantiteChange(i)" min="1">
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="ligne-field prix-field">
+                                        <mat-label>Prix HT</mat-label>
+                                        <input matInput type="number" formControlName="Prix_HT" (change)="onQuantiteChange(i)">
+                                        <span matPrefix>dh&nbsp;</span>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="ligne-field tva-field">
+                                        <mat-label>TVA</mat-label>
+                                        <input matInput type="number" formControlName="TVA" (change)="onQuantiteChange(i)">
+                                        <span matSuffix>%</span>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="ligne-field prix-field">
+                                        <mat-label>Prix TTC</mat-label>
+                                        <input matInput type="number" formControlName="Prix_TTC" readonly>
+                                        <span matPrefix>dh&nbsp;</span>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="ligne-field total-field">
+                                        <mat-label>Total TTC</mat-label>
+                                        <input matInput type="number" formControlName="MontantTTC" readonly>
+                                        <span matPrefix>dh&nbsp;</span>
+                                    </mat-form-field>
+
+                                    <button mat-icon-button color="warn" type="button" (click)="removeLigne(i)" class="remove-btn">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+
+                                <!-- Article details -->
+                                <div *ngIf="ligne.value.article" class="article-details">
+                                    <small>
+                                        <span class="detail-item">Catégorie: {{ ligne.value.article.categorie.nom }}</span> |
+                                        <span class="detail-item">Stock: {{ ligne.value.article.stock || 0 }}</span> |
+                                        <span class="detail-item">Ref: {{ ligne.value.article.code }}</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div *ngIf="lignes.length === 0" class="no-lignes">
+                            <mat-icon>inventory_2</mat-icon>
+                            <p>Aucun article ajouté au facture</p>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button mat-button type="button" (click)="resetForm()" class="cancel-button">
+                            Annuler
+                        </button>
+                        <button mat-raised-button color="primary" type="submit"
+                                [disabled]="factureForm.invalid || lignes.length === 0 || isLoading()">
+                            <span *ngIf="!isLoading()">
+                                {{ isEditing() ? 'Modifier' : 'Créer' }} la facture
+                            </span>
+                            <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+                        </button>
+                    </div>
+                </form>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Filter Panel -->
+        <div class="filter-panel" [class.expanded]="showFilters()">
+            <form class="filter-form">
+                <div class="filter-grid">
+                    <mat-form-field appearance="outline" class="filter-field">
+                        <mat-label>Code facture</mat-label>
+                        <input matInput placeholder="Rechercher par code"
+                            [(ngModel)]="codeFilter"
+                            name="codeFilter"
+                            (input)="onCodeFilterChange($event)">
+                        <mat-icon matSuffix>search</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="filter-field">
+                        <mat-label>Intervenant</mat-label>
+                        <mat-select (selectionChange)="onIntervenantFilterChange($event)"
+                            [(ngModel)]="intervenantFilter"
+                            name="intervenantFilter">
+                            <mat-option value="-1">Tous les intervenants</mat-option>
+                            <mat-option *ngFor="let intervenant of fournisseurs()" [value]="intervenant.id">
+                                {{ intervenant.nomComplet }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matSuffix>person</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="filter-field">
+                        <mat-label>Date début</mat-label>
+                        <input matInput [matDatepicker]="dateDebutPicker"
+                            [(ngModel)]="dateDebutFilter"
+                            name="dateDebutFilter"
+                            (dateChange)="onDateDebutFilterChange($event)">
+                        <mat-datepicker-toggle matSuffix [for]="dateDebutPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #dateDebutPicker></mat-datepicker>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="filter-field">
+                        <mat-label>Date fin</mat-label>
+                        <input matInput [matDatepicker]="dateFinPicker"
+                            [(ngModel)]="dateFinFilter"
+                            name="dateFinFilter"
+                            (dateChange)="onDateFinFilterChange($event)">
+                        <mat-datepicker-toggle matSuffix [for]="dateFinPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #dateFinPicker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+
+                <div class="filter-actions">
+                    <button mat-button type="button" (click)="clearFilters()" [disabled]="!hasActiveFilters()">
+                        Réinitialiser
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Transactions List -->
+        <mat-card class="list-card">
+            <mat-card-header>
+                <mat-card-title>Liste des facture</mat-card-title>
+                <span class="total-count">{{ filteredFactures().length }} facture(s) </span>
+                <button mat-stroked-button color="primary" class="filter-button" (click)="toggleFilters()">
+                    <mat-icon>filter_list</mat-icon>
+                    Filtres
+                    <span *ngIf="hasActiveFilters()" class="filter-badge"></span>
+                </button>
+            </mat-card-header>
+            <mat-card-content>
+                @if (isLoading()) {
+                    <div class="loading-spinner">
+                        <mat-spinner diameter="40"></mat-spinner>
+                    </div>
+                } @else if (factures().length === 0) {
+                    <div class="empty-state">
+                        <mat-icon>local_shipping</mat-icon>
+                        <h3>Aucun facture trouvé</h3>
+                        <p>Commencez par créer votre premier facture</p>
+                    </div>
+                } @else if (filteredFactures().length === 0) {
+                    <div class="empty-state">
+                        <mat-icon>search_off</mat-icon>
+                        <h3>Aucun facture ne correspond aux filtres</h3>
+                        <p>Modifiez vos critères de recherche</p>
+                    </div>
+                } @else {
+                    <div class="table-container">
+                        <table mat-table [dataSource]="filteredFactures()" class="commandes-table" multiTemplateDataRows>
+                            <!-- Expand Column -->
+                            <ng-container matColumnDef="expand">
+                                <th mat-header-cell *matHeaderCellDef aria-label="row actions"></th>
+                                <td mat-cell *matCellDef="let facture">
+                                    <button mat-icon-button (click)="toggleTransactionDetails(facture)" aria-label="Expand row">
+                                        <mat-icon *ngIf="!isTransactionExpanded(facture)">keyboard_arrow_down</mat-icon>
+                                        <mat-icon *ngIf="isTransactionExpanded(facture)">keyboard_arrow_up</mat-icon>
+                                    </button>
+                                </td>
+                            </ng-container>
+
+                            <!-- Code Column -->
+                            <ng-container matColumnDef="code">
+                                <th mat-header-cell *matHeaderCellDef>Code</th>
+                                <td mat-cell *matCellDef="let facture" class="code-cell">
+                                    <mat-icon>receipt</mat-icon>
+                                    {{ facture.code }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Intervenant Column -->
+                            <ng-container matColumnDef="intervenant">
+                                <th mat-header-cell *matHeaderCellDef>fournisseur</th>
+                                <td mat-cell *matCellDef="let facture" class="client-cell">
+                                    <div class="client-info">
+                                        <mat-icon>person</mat-icon>
+                                        <span>
+                                            {{ facture.fournisseur?.nomComplet }}
+                                            <span *ngIf="facture.fournisseur.email">- {{ facture.fournisseur.email }}</span>
+                                        </span>
+                                    </div>
+                                </td>
+                            </ng-container>
+
+                            <!-- Date Column -->
+                            <ng-container matColumnDef="date">
+                                <th mat-header-cell *matHeaderCellDef>Date</th>
+                                <td mat-cell *matCellDef="let facture" class="date-cell">
+                                    {{ facture.dateFacture | date:'dd/MM/yyyy' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Montant Column -->
+                            <ng-container matColumnDef="montant">
+                                <th mat-header-cell *matHeaderCellDef>Montant</th>
+                                <td mat-cell *matCellDef="let facture" class="montant-cell">
+                                    <span class="montant-value">{{ facture.montantTotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Actions Column -->
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                                <td mat-cell *matCellDef="let facture" class="actions-cell">
+                                    <button mat-icon-button color="primary" (click)="onEdit(facture)" title="Modifier">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                                    <button mat-icon-button color="warn" (click)="onDelete(facture)" title="Supprimer">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </td>
+                            </ng-container>
+
+                            <!-- Expanded Content Column -->
+                            <ng-container matColumnDef="expandedDetail">
+                                <td mat-cell *matCellDef="let facture" [attr.colspan]="displayedColumns.length">
+                                    <div class="commande-detail" [class.expanded]="isTransactionExpanded(facture)">
+                                        <div class="detail-header">
+                                            <h4>Détails du facture</h4>
+                                            <span class="article-count">{{ facture.lignes.length }} article(s)</span>
+                                        </div>
+
+                                        <div class="lignes-table">
+                                            <div class="ligne-header">
+                                                <span class="ligne-col article">Article</span>
+                                                <span class="ligne-col quantity">Quantité</span>
+                                                <span class="ligne-col price">Prix HT</span>
+                                                <span class="ligne-col tva">TVA</span>
+                                                <span class="ligne-col price">Prix TTC</span>
+                                                <span class="ligne-col total">Total TTC</span>
+                                            </div>
+
+                                            <div class="ligne-row" *ngFor="let ligne of facture.lignes">
+                                                <span class="ligne-col article">
+                                                    <strong>{{ getArticleName(ligne.id_Article) }}</strong>
+                                                    <small *ngIf="ligne.article?.code">({{ ligne.article.code }})</small>
+                                                </span>
+                                                <span class="ligne-col quantity">{{ ligne.quantite }}</span>
+                                                <span class="ligne-col price">{{ ligne.prix_HT | currency:'EUR':'symbol':'1.2-2' }}</span>
+                                                <span class="ligne-col tva">{{ ligne.tva }} %</span>
+                                                <span class="ligne-col price">{{ ligne.prix_TTC | currency:'EUR':'symbol':'1.2-2' }}</span>
+                                                <span class="ligne-col total">{{ ligne.montantTTC | currency:'EUR':'symbol':'1.2-2' }}</span>
+                                            </div>
+
+                                            <div class="ligne-total">
+                                                <span class="ligne-col article"></span>
+                                                <span class="ligne-col quantity"></span>
+                                                <span class="ligne-col price"></span>
+                                                <span class="ligne-col tva"></span>
+                                                <span class="ligne-col price"><strong>Total:</strong></span>
+                                                <span class="ligne-col total"><strong>{{ facture.montantTotal | currency:'EUR':'symbol':'1.2-2' }}</strong></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                                class="commande-row"
+                                [class.expanded]="isTransactionExpanded(row)">
+                            </tr>
+                            <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+                        </table>
+                    </div>
+                }
+            </mat-card-content>
+        </mat-card>
+        </main>
+    </div>
+</div>

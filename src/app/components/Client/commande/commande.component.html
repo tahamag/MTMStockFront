@@ -21,7 +21,7 @@
 
         <!-- Commande Form -->
         <mat-card class="form-card">
-            
+
             <mat-card-header>
                 <mat-card-title>
                     {{ isEditing() ? 'Modifier la Commande' : 'Nouvelle Commande Client' }}
@@ -43,13 +43,13 @@
                             </mat-error>
                         </mat-form-field>
                         </div>
-    
+
                         <div class="form-group">
                         <mat-form-field appearance="outline" class="form-field">
                             <mat-label>Client</mat-label>
                             <mat-select formControlName="client">
                                 <mat-option *ngFor="let client of clients()" [value]="client.id">
-                                    {{ client.nomComplet }} 
+                                    {{ client.nomComplet }}
                                     <span *ngIf="client.email">- {{ client.email }}</span>
                                 </mat-option>
                             </mat-select>
@@ -60,7 +60,7 @@
                         </mat-form-field>
                         </div>
                     </div>
-    
+
                     <!-- Right Column -->
                     <div class="form-column">
                         <div class="total-section">
@@ -74,7 +74,7 @@
                         </div>
                     </div>
                     </div>
-    
+
                     <!-- Lignes de Commande -->
                     <div class="lignes-section">
                     <div class="section-header">
@@ -84,7 +84,7 @@
                         Ajouter un article
                         </button>
                     </div>
-    
+
                     <div formArrayName="lignes" class="lignes-container">
                         <div *ngFor="let ligne of lignes.controls; let i = index" [formGroupName]="i" class="ligne-item">
                         <div class="ligne-content">
@@ -92,69 +92,69 @@
                             <mat-label>Article</mat-label>
                             <mat-select formControlName="id_Article" (selectionChange)="onArticleChange(i, $event.value)">
                                 <mat-option *ngFor="let article of articles()" [value]="article.id">
-                                {{ article.designation }} 
+                                {{ article.designation }}
                                 <span *ngIf="article.code">({{ article.code }})</span>
                                 - {{ article.prixV_TTC | currency:'EUR':'symbol':'1.2-2' }} TTC
                                 </mat-option>
                             </mat-select>
                             </mat-form-field>
-    
+
                             <mat-form-field appearance="outline" class="ligne-field quantite-field">
                             <mat-label>Quantité</mat-label>
                             <input matInput type="number" formControlName="quantite" (change)="onquantiteChange(i)" min="1">
                             </mat-form-field>
-    
+
                             <mat-form-field appearance="outline" class="ligne-field prix-field">
                             <mat-label>Prix HT</mat-label>
                             <input matInput type="number" formControlName="Prix_HT" (change)="onquantiteChange(i)">
                             <span matPrefix>dh&nbsp;</span>
                             </mat-form-field>
-    
+
                             <mat-form-field appearance="outline" class="ligne-field tva-field">
                             <mat-label>TVA</mat-label>
                             <input matInput type="number" formControlName="TVA" (change)="onquantiteChange(i)">
                             <span matSuffix>%</span>
                             </mat-form-field>
-    
+
                             <mat-form-field appearance="outline" class="ligne-field prix-field">
                             <mat-label>Prix TTC</mat-label>
                             <input matInput type="number" formControlName="Prix_TTC" readonly>
                             <span matPrefix>dh&nbsp;</span>
                             </mat-form-field>
-    
+
                             <mat-form-field appearance="outline" class="ligne-field total-field">
                             <mat-label>Total TTC</mat-label>
                             <input matInput type="number" formControlName="MontantTTC" readonly>
                             <span matPrefix>dh&nbsp;</span>
                             </mat-form-field>
-    
+
                             <button mat-icon-button color="warn" type="button" (click)="removeLigne(i)" class="remove-btn">
                             <mat-icon>delete</mat-icon>
                             </button>
                         </div>
-                        
+
                         <!-- Article details -->
                         <div *ngIf="ligne.value.article" class="article-details">
                             <small>
-                            <span class="detail-item">Catégorie: {{ ligne.value.article.categorie.nom }}</span> | 
+                            <span class="detail-item">Catégorie: {{ ligne.value.article.categorie.nom }}</span> |
                             <span class="detail-item">Stock: {{ ligne.value.article.stock || 0 }}</span> |
                             <span class="detail-item">Ref: {{ ligne.value.article.code }}</span>
                             </small>
                         </div>
                         </div>
                     </div>
-    
+
                     <div *ngIf="lignes.length === 0" class="no-lignes">
                         <mat-icon>inventory_2</mat-icon>
                         <p>Aucun article ajouté à la commande</p>
                     </div>
                     </div>
-    
+
                     <div class="form-actions">
                     <button mat-button type="button" (click)="resetForm()" class="cancel-button">
                         Annuler
                     </button>
-                    <button mat-raised-button color="primary" type="submit" 
+                    <button mat-raised-button color="primary" type="submit"
                             [disabled]="commandeForm.invalid || lignes.length === 0 || isLoading()">
                         <span *ngIf="!isLoading()">
                         {{ isEditing() ? 'Modifier' : 'Créer' }} la Commande
@@ -167,23 +167,27 @@
         </mat-card>
 
         <!-- Commandes List -->
-        
+
         <!-- Filter Panel -->
-        
+
         <div class="filter-panel" [class.expanded]="showFilters()">
             <form  class="filter-form">
                 <div class="filter-grid">
-                    
+
                 <mat-form-field appearance="outline" class="filter-field">
                     <mat-label>Code commande</mat-label>
                     <input matInput  placeholder="Rechercher par code"
+                    [(ngModel)]="codeFilter"
+                    name="codeFilter"
                     (input)="onCodeFilterChange($event)">
                     <mat-icon matSuffix>search</mat-icon>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="filter-field">
                     <mat-label>Client</mat-label>
-                    <mat-select (selectionChange)="onClientFilterChange($event)">
+                    <mat-select (selectionChange)="onClientFilterChange($event)"
+                    [(ngModel)]="clientFilter"
+                    name="clientFilter">
                         <mat-option value="-1">Tous les clients</mat-option>
                         <mat-option *ngFor="let client of clients()" [value]="client.id">
                             {{ client.nomComplet }}
@@ -191,21 +195,24 @@
                     </mat-select>
                     <mat-icon matSuffix>person</mat-icon>
                 </mat-form-field>
-
                 <mat-form-field appearance="outline" class="filter-field">
                     <mat-label>Date début</mat-label>
-                    <input matInput [matDatepicker]="dateDebutPicker" 
+                    <input matInput [matDatepicker]="dateDebutPicker"
+                    [(ngModel)]="dateDebutFilter"
+                    name="dateDebutFilter" disabled
                     (dateChange)="onDateDebutFilterChange($event)">
                     <mat-datepicker-toggle matSuffix [for]="dateDebutPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #dateDebutPicker></mat-datepicker>
+                    <mat-datepicker #dateDebutPicker disabled="false"></mat-datepicker>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="filter-field">
                     <mat-label>Date fin</mat-label>
-                    <input matInput [matDatepicker]="dateFinPicker"
+                    <input matInput [matDatepicker]="dateFinPicker" disabled
+                    [(ngModel)]="dateFinFilter"
+                    name="dateFinFilter"
                     (dateChange)="onDateFinFilterChange($event)">
                     <mat-datepicker-toggle matSuffix [for]="dateFinPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #dateFinPicker></mat-datepicker>
+                    <mat-datepicker #dateFinPicker  disabled="false"></mat-datepicker>
                 </mat-form-field>
                 </div>
 
@@ -316,7 +323,7 @@
                                 <h4>Détails de la commande</h4>
                                 <span class="article-count">{{ commande.lignes.length }} article(s)</span>
                             </div>
-                            
+
                             <div class="lignes-table">
                                 <div class="ligne-header">
                                 <span class="ligne-col article">Article</span>
@@ -326,7 +333,7 @@
                                 <span class="ligne-col price">Prix TTC</span>
                                 <span class="ligne-col total">Total TTC</span>
                                 </div>
-                                
+
                                 <div class="ligne-row" *ngFor="let ligne of commande.lignes">
                                 <span class="ligne-col article">
                                     <strong>{{ getArticleName(ligne.id_Article) }}</strong>
@@ -338,7 +345,7 @@
                                 <span class="ligne-col price">{{ ligne.prix_TTC | currency:'EUR':'symbol':'1.2-2' }}</span>
                                 <span class="ligne-col total">{{ ligne.montantTTC | currency:'EUR':'symbol':'1.2-2' }}</span>
                                 </div>
-                                
+
                                 <div class="ligne-total">
                                 <span class="ligne-col article"></span>
                                 <span class="ligne-col quantity"></span>
@@ -353,18 +360,18 @@
                         </ng-container>
 
                         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                        <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
                             class="commande-row"
                             [class.expanded]="isCommandeExpanded(row)">
                         </tr>
                         <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
-                    
+
                 </table>
                 </div>
             }
             </mat-card-content>
         </mat-card>
-    
+
         </main>
     </div>
 </div>

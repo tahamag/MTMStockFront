@@ -20,10 +20,11 @@ import { HeaderComponent } from '../../../shared/header/header.component';
 import { SidebarComponent } from '../../../shared/sidebar/sidebar.component';
 
 // Services
-import { FournisseurService } from '../../../services/fournisseur/fournisseur.service';
-import { Fournisseur } from '../../../models/fournisseur';
+import { Employe } from '../../../models/Employe';
+import { UtilisateurService } from '../../../services/utilisateur/utilisateur.service';
+
 @Component({
-  selector: 'app-fournisseur',
+  selector: 'app-utilisateur',
   standalone: true,
   imports: [
     CommonModule,
@@ -40,40 +41,53 @@ import { Fournisseur } from '../../../models/fournisseur';
     MatSelectModule,
     MatChipsModule,
     HeaderComponent,
-    SidebarComponent,],
-  templateUrl: './fournisseur.component.html',
-  styleUrl: './fournisseur.component.css'
+    SidebarComponent,
+],
+  templateUrl: './utilisateur.component.html',
+  styleUrl: './utilisateur.component.css'
 })
-export class FournisseurComponent {
+export class UtilisateurComponent {
   private fb = inject(FormBuilder);
-  private fournisseurService = inject(FournisseurService);
+  private UtilisateurService = inject(UtilisateurService);
   private snackBar = inject(MatSnackBar);
 
-  fournisseurs = signal<Fournisseur[]>([]);
+  Employes = signal<Employe[]>([]);
   isLoading = signal(false);
   isEditing = signal(false);
   currentEditId = signal<number | null>(null);
   filterName = signal('');
-  filterCode = signal('');
-  filteredfournisseurs = signal<Fournisseur[]>([]);
+  filteredEmployes = signal<Employe[]>([]);
+  hidePassword = signal(true);
 
-  fournisseurForm: FormGroup;
-  displayedColumns: string[] = ['code', 'nomComplet', 'email', 'telephone', 'adresse', 'actions'];
+  EmployeForm: FormGroup;
+  displayedColumns: string[] = ['nom', 'email', 'telephone', 'role', 'actions'];
 
   constructor() {
-    this.fournisseurForm = this.fb.group({
-      code: ['', ],
-      nomComplet: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['',Validators.email ],
+    this.EmployeForm = this.fb.group({
+      nom: ['', [Validators.required, Validators.minLength(3)]],
+      email: ['',Validators.email],
       telephone: ['', [Validators.pattern(/^[0-9]{10}$/)]],
-      adresse: ['', ],
+      role: ['employe' ],
+      mot_de_passe: ['',[
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/)
+      ]],
     });
   }
 
   ngOnInit(): void {
-    this.loadfournisseur();
+    this.loadEmployes();
   }
 
+  getPasswordErrorMessage(): string{
+    if(this.EmployeForm.get('mot_de_passe')?.hasError('required'))
+      return 'mot de passe est obligatoire';
+
+    if(this.EmployeForm.get('mot_de_passe')?.hasError('minlength'))
+      return 'le mot de passe doit comporter au moins 8 caractères';
+
+    return this.EmployeForm.get('pattern')? 'Nécessite des majuscules, des minuscules et des chiffres' : '';
+  }
   onNameFilterChange(event: any): void {
     this.filterName.set(event.target.value);
     this.applyFilters();
@@ -86,21 +100,20 @@ export class FournisseurComponent {
 
   applyFilters(): void {
     const nameFilter = this.filterName().toLowerCase();
-    this.filteredfournisseurs.set(
-      this.fournisseurs().filter(fournisseur => {
-        const matchesName = fournisseur.nomComplet.includes(nameFilter) ||
-                            fournisseur.code!.toLowerCase().includes(nameFilter);
+    this.filteredEmployes.set(
+      this.Employes().filter(Employe => {
+        const matchesName = Employe.nom.includes(nameFilter)
         return matchesName ;
       })
     );
   }
 
-  loadfournisseur(): void {
+  loadEmployes(): void {
     this.isLoading.set(true);
-    this.fournisseurService.getFournisseurs().subscribe({
+    this.UtilisateurService.getEmployes().subscribe({
       next: (response) => {
         if (response) {
-          this.fournisseurs.set(response);
+          this.Employes.set(response);
           this.applyFilters();
         }
         this.isLoading.set(false);
@@ -113,14 +126,13 @@ export class FournisseurComponent {
   }
 
   onSubmit(): void {
-    if (this.fournisseurForm.valid) {
+    if (this.EmployeForm.valid) {
       this.isLoading.set(true);
-      const formData = this.fournisseurForm.value;
-
+      const formData = this.EmployeForm.value;
       if (this.isEditing() && this.currentEditId() !== null) {
-        this.fournisseurService.updateFournisseur(this.currentEditId()!, formData).subscribe({
+        this.UtilisateurService.updateEmploye(this.currentEditId()!, formData).subscribe({
           next: (response) => {
-            this.handleSuccess(response, 'fournisseur modifié avec succès');
+            this.handleSuccess(response, 'Employe modifié avec succès');
             this.resetForm();
           },
           error: (error) => {
@@ -128,10 +140,11 @@ export class FournisseurComponent {
           }
         });
       } else {
+      console.log(formData)
 
-        this.fournisseurService.createFournisseur(formData).subscribe({
+        this.UtilisateurService.createEmploye(formData).subscribe({
           next: (response) => {
-            this.handleSuccess(response, 'fournisseur créé avec succès');
+            this.handleSuccess(response, 'Employe créé avec succès');
             this.resetForm();
           },
           error: (error) => {
@@ -142,25 +155,24 @@ export class FournisseurComponent {
     }
   }
 
-  onEdit(fournisseur: Fournisseur): void {
+  onEdit(Employe: Employe): void {
     this.isEditing.set(true);
-    this.currentEditId.set(fournisseur.id);
-    alert(fournisseur.id)
-    this.fournisseurForm.patchValue({
-      nomComplet:fournisseur.nomComplet,
-      email: fournisseur.email,
-      telephone:fournisseur.telephone,
-      adresse:fournisseur.adresse,
+    this.currentEditId.set(Employe.id!);
+    this.EmployeForm.patchValue({
+      nom:Employe.nom,
+      email: Employe.email,
+      telephone:Employe.telephone,
+      role:'employe',
     });
 
   }
 
-  onDelete(fournisseur: Fournisseur): void {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer fournisseur "${fournisseur.nomComplet}" ?`)) {
+  onDelete(Employe: Employe): void {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer Employe "${Employe.nom}" ?`)) {
       this.isLoading.set(true);
-      this.fournisseurService.deleteFournisseur(fournisseur.id).subscribe({
+      this.UtilisateurService.deleteEmploye(Employe.id!).subscribe({
         next: (response) => {
-          this.handleSuccess(response, 'fournisseur supprimé avec succès');
+          this.handleSuccess(response, 'Employe supprimé avec succès');
         },
         error: (error) => {
           this.handleError(error);
@@ -170,7 +182,7 @@ export class FournisseurComponent {
   }
 
   resetForm(): void {
-    this.fournisseurForm.reset();
+    this.EmployeForm.reset();
     this.isEditing.set(false);
     this.currentEditId.set(null);
   }
@@ -182,7 +194,7 @@ export class FournisseurComponent {
         duration: 3000,
         panelClass: ['success-snackbar']
       });
-      this.loadfournisseur();
+      this.loadEmployes();
     } else {
       this.snackBar.open(response.message || 'Une erreur est survenue', 'Fermer', {
         duration: 5000,
@@ -198,4 +210,5 @@ export class FournisseurComponent {
       panelClass: ['error-snackbar']
     });
   }
+
 }

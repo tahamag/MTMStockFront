@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -22,16 +22,19 @@ import { HeaderComponent } from '../../../shared/header/header.component';
 import { SidebarComponent } from '../../../shared/sidebar/sidebar.component';
 
 // Services
-import { CommandeService } from '../../../services/commande/commande.service';
+import { TransactionService } from '../../../services/transaction/transaction.service';
 import { ArticleService } from '../../../services/article/article.service';
 import { ClientService } from '../../../services/client/client.service';
-import { Commande, } from '../../../models/commande';
-import { Client } from './../../../models/client';
+import { DepotService } from '../../../services/depot/depot.service';
+import { Transaction } from '../../../models/transaction';
+import { Client } from '../../../models/client';
 import { Article } from '../../../models/article';
-
+import { Depot } from '../../../models/depot';
+import { Fournisseur } from '../../../models/fournisseur';
+import { FournisseurService } from '../../../services/fournisseur/fournisseur.service';
 
 @Component({
-  selector: 'app-commande',
+  selector: 'app-bon-livraison',
   standalone: true,
   imports: [
     CommonModule,
@@ -57,58 +60,62 @@ import { Article } from '../../../models/article';
     {provide: MAT_DATE_LOCALE, useValue: 'fr'},
     provideNativeDateAdapter()
   ],
-  templateUrl: './commande.component.html',
-  styleUrl: './commande.component.css'
+  templateUrl: './bon-livraison.component.html',
+  styleUrl: './bon-livraison.component.css'
 })
-export class CommandeComponent {
+export class BonLivraisonComponent {
 
   private fb = inject(FormBuilder);
-  private commandeService = inject(CommandeService);
+  private transactionService = inject(TransactionService);
   private articleService = inject(ArticleService);
   private clientService = inject(ClientService);
+  private fournisseurService = inject(FournisseurService);
+  private depotService = inject(DepotService);
   private snackBar = inject(MatSnackBar);
 
-  commandes = signal<Commande[]>([]);
+  transactions = signal<Transaction[]>([]);
   clients = signal<Client[]>([]);
+  fournisseurs = signal<Fournisseur[]>([]);
+  depots = signal<Depot[]>([]);
   articles = signal<Article[]>([]);
   isLoading = signal(false);
   isEditing = signal(false);
   currentEditId = signal<number | null>(null);
-  expandedCommande = signal<Commande | null>(null); // Track which command is expanded
-  showFilters = signal(false); // Control filter panel visibility
+  expandedTransaction = signal<Transaction | null>(null);
+  showFilters = signal(false);
 
   filterCode = signal('');
-  filterClient = signal('');
+  filterIntervenant = signal('');
   filterDateDebut = signal<Date>(new Date());
   filterDateFin = signal<Date>(new Date());
-  filteredCommandes = signal<Commande[]>([]);
+  filteredTransactions = signal<Transaction[]>([]);
 
-  commandeForm: FormGroup;
-  displayedColumns: string[] = ['expand', 'code', 'client', 'date', 'montant', 'actions'];
-  codeFilter:any = "";
-  clientFilter:any = "";
-  dateDebutFilter:any = new Date();
-  dateFinFilter:any = new Date();
-
+  transactionForm: FormGroup;
+  displayedColumns: string[] = ['expand', 'code', 'intervenant', 'date', 'montant', 'actions'];
+  codeFilter: any = "";
+  intervenantFilter: any = "";
+  dateDebutFilter: any = new Date();
+  dateFinFilter: any = new Date();
+  typeIntervenant: string = 'clients'; // Default to clients
 
   constructor() {
-    this.filterDateDebut.set(new Date);
-    // Main command form
-    this.commandeForm = this.fb.group({
-      typeIntervenant: ['client'],
+    // Main transaction form
+    this.transactionForm = this.fb.group({
+      typeIntervenant: ['clients'],
+      Id_intervenant: [null, Validators.required],
+      id_depot: [null, Validators.required],
       code: [''],
-      dateCommande: [new Date(), Validators.required],
-      client: [null, Validators.required],
-      Id_intervenant :[''],
+      dateTransaction: [new Date(), Validators.required],
       montantTotal: [0, [Validators.required, Validators.min(0)]],
       lignes: this.fb.array([])
     });
-
   }
 
   ngOnInit(): void {
-    this.loadCommandes();
+    this.loadTransactions();
     this.loadClients();
+    this.loadFournisseurs();
+    this.loadDepots();
     this.loadArticles();
   }
 
@@ -122,87 +129,96 @@ export class CommandeComponent {
 
   // Clear all filters
   clearFilters(): void {
-
-    this.codeFilter =""
-    this.clientFilter =""
+    this.codeFilter = "";
+    this.intervenantFilter = "";
     this.dateDebutFilter = new Date();
     this.dateFinFilter = new Date();
     this.filterCode.set('');
-    this.filterClient.set('');
-
-    const currentDate = new Date();
-    this.filterDateDebut.set(currentDate);
-    this.filterDateFin.set(currentDate);
-    this.filterCommandes();
+    this.filterIntervenant.set('');
+    this.filterTransactions();
   }
 
   onCodeFilterChange(event: any): void {
     this.filterCode.set(event.target.value)
-    this.filterCommandes();
+    this.filterTransactions();
   }
-  onClientFilterChange(event: MatSelectChange): void {
-    this.filterClient.set(event.value)
-    this.filterCommandes();
+
+  onIntervenantFilterChange(event: MatSelectChange): void {
+    this.filterIntervenant.set(event.value)
+    this.filterTransactions();
   }
+
   onDateDebutFilterChange(event: MatDatepickerInputEvent<Date>): void {
-    this.filterDateDebut.set(event.value?? new Date())
-    this.filterCommandes();
+    this.filterDateDebut.set(event.value ?? new Date())
+    this.filterTransactions();
   }
+
   onDateFinFilterChange(event: MatDatepickerInputEvent<Date>): void {
-    this.filterDateFin.set(event.value?? new Date())
-    this.filterCommandes();
+    this.filterDateFin.set(event.value ?? new Date())
+    this.filterTransactions();
   }
 
-filterCommandes(): void {
-  const start = new Date (this.filterDateDebut());
-  const end = new Date (this.filterDateFin());
-  const codeFilter = this.filterCode()?.toLowerCase() || '';
-  const fournisseurId = parseInt(this.filterClient(), 10);
+  onTypeIntervenantChange(event: MatSelectChange): void {
+    this.typeIntervenant = event.value;
+    this.transactionForm.patchValue({
+      typeIntervenant: event.value,
+      Id_intervenant: null
+    });
+    this.loadTransactions();
+  }
 
-  this.filteredCommandes.set(
-    this.commandes().filter(commande => {
-      const dateCommande = new Date(commande.dateCommande);
-      const afterStart = !start || dateCommande >= start;
-      const beforeEnd = !end || dateCommande <= end;
+  filterTransactions(): void {
+    const start = new Date(this.filterDateDebut());
+    const end = new Date(this.filterDateFin());
+    const codeFilter = this.filterCode()?.toLowerCase() || '';
+    const intervenantId = parseInt(this.filterIntervenant(), 10);
 
-      const matchesCode = !codeFilter || commande.code?.toLowerCase().includes(codeFilter);
-    const matchesfournisseur = isNaN(fournisseurId) || fournisseurId === -1 || commande.fournisseur?.id === fournisseurId;
+    this.filteredTransactions.set(
+      this.transactions().filter(transaction => {
+        const dateTransaction = new Date(transaction.dateTransaction);
+        const afterStart = !start || dateTransaction >= start;
+        const beforeEnd = !end || dateTransaction <= end;
+        console.log('dateTransaction:', dateTransaction,'end:', end, 'beforeEnd:', beforeEnd);
 
-      return afterStart &&   beforeEnd  && matchesCode && matchesfournisseur;
-    })
-  );
-}
+        const matchesCode = !codeFilter || transaction.code?.toLowerCase().includes(codeFilter);
+        const matchesIntervenant = isNaN(intervenantId) || intervenantId === -1 || transaction.client?.id === intervenantId;
+// afterStart && beforeEnd &&
+        return matchesCode && matchesIntervenant;
+      })
+    );
+  }
 
   // Check if any filter is active
   hasActiveFilters(): boolean {
-    return !!this.filterCode || !!this.filterClient || !!this.filterDateDebut || !!this.filterDateFin;
+    return !!this.filterCode() || !!this.filterIntervenant() || !!this.filterDateDebut() || !!this.filterDateFin();
   }
-  // Toggle command details view
-  toggleCommandeDetails(commande: Commande): void {
-    if (this.expandedCommande() === commande) {
-      this.expandedCommande.set(null);
+
+  // Toggle transaction details view
+  toggleTransactionDetails(transaction: Transaction): void {
+    if (this.expandedTransaction() === transaction) {
+      this.expandedTransaction.set(null);
     } else {
-      this.expandedCommande.set(commande);
+      this.expandedTransaction.set(transaction);
     }
   }
 
-  // Check if a command is expanded
-  isCommandeExpanded(commande: Commande): boolean {
-    return this.expandedCommande() === commande;
+  // Check if a transaction is expanded
+  isTransactionExpanded(transaction: Transaction): boolean {
+    return this.expandedTransaction() === transaction;
   }
 
   get lignes(): FormArray {
-    return this.commandeForm.get('lignes') as FormArray;
+    return this.transactionForm.get('lignes') as FormArray;
   }
 
-  createLigne(article?: Article, ligne? : any ): FormGroup {
-    if(ligne){
+  createLigne(article?: Article, ligne?: any): FormGroup {
+    if (ligne) {
       const prixTTC = ligne ? ligne.prix_TTC || 0 : 0;
       const tva = ligne ? ligne.tva || 0 : 0;
       const prixHT = prixTTC / (1 + tva / 100);
 
       return this.fb.group({
-        id :ligne?.id,
+        id: ligne?.id,
         id_Article: [ligne?.id_Article || null, Validators.required],
         quantite: [ligne?.quantite, [Validators.required, Validators.min(1)]],
         Prix_HT: [prixHT],
@@ -211,8 +227,7 @@ filterCommandes(): void {
         MontantTTC: [prixTTC * ligne?.quantite],
         article: [article || null]
       });
-    }
-    else{
+    } else {
       const prixTTC = article ? article.prixV_TTC || 0 : 0;
       const tva = article ? article.tva || 0 : 0;
       const prixHT = prixTTC / (1 + tva / 100);
@@ -257,14 +272,14 @@ filterCommandes(): void {
     }
   }
 
-  onquantiteChange(index: number): void {
+  onQuantiteChange(index: number): void {
     const ligne = this.lignes.at(index);
     const quantite = ligne.value.quantite;
     const prixHT = ligne.value.Prix_HT;
     const TVA = ligne.value.TVA;
     const prixTTC = prixHT * (1 + TVA / 100);
     ligne.patchValue({
-      Prix_TTC : prixTTC,
+      Prix_TTC: prixTTC,
       MontantTTC: quantite * prixTTC
     });
     this.calculateTotal();
@@ -274,21 +289,25 @@ filterCommandes(): void {
     const total = this.lignes.controls.reduce((sum, ligne) => {
       return sum + (ligne.value.MontantTTC || 0);
     }, 0);
-    this.commandeForm.patchValue({ montantTotal: total });
+    this.transactionForm.patchValue({ montantTotal: total });
   }
 
-  loadCommandes(): void {
+  loadTransactions(): void {
     this.isLoading.set(true);
-    this.commandeService.getCommandes('clients').subscribe({
+    this.transactionService.getTransactions('clients').subscribe({
       next: (response) => {
         if (response) {
-          this.commandes.set(response);
-          this.filteredCommandes.set(response);
-          this.filterCommandes();
+
+          console.log('Transactions loaded:', response);
+          this.transactions.set(response);
+          this.filteredTransactions.set(response);
+          this.filterTransactions();
         }
         this.isLoading.set(false);
       },
       error: (error) => {
+          console.log('Transactions loaded:', error);
+
         this.handleError(error);
         this.isLoading.set(false);
       }
@@ -300,6 +319,32 @@ filterCommandes(): void {
       next: (response) => {
         if (response) {
           this.clients.set(response);
+        }
+      },
+      error: (error) => {
+        this.handleError(error);
+      }
+    });
+  }
+
+  loadFournisseurs(): void {
+    this.fournisseurService.getFournisseurs().subscribe({
+      next: (response) => {
+        if (response) {
+          this.fournisseurs.set(response);
+        }
+      },
+      error: (error) => {
+        this.handleError(error);
+      }
+    });
+  }
+
+  loadDepots(): void {
+    this.depotService.getDepots().subscribe({
+      next: (response) => {
+        if (response) {
+          this.depots.set(response);
         }
       },
       error: (error) => {
@@ -322,14 +367,14 @@ filterCommandes(): void {
   }
 
   onSubmit(): void {
-    if (this.commandeForm.valid && this.lignes.length > 0) {
+    if (this.transactionForm.valid && this.lignes.length > 0) {
       this.isLoading.set(true);
-      // Prepare the commande data
-      const formData = this.prepareCommandeData();
+      const formData = this.prepareTransactionData();
+      console.log('Submitting form data:', formData);
       if (this.isEditing() && this.currentEditId() !== null) {
-        this.commandeService.updateCommande(this.currentEditId()!, formData).subscribe({
+        this.transactionService.updateTransaction(this.currentEditId()!, formData).subscribe({
           next: (response) => {
-            this.handleSuccess(response, 'Commande modifiée avec succès');
+            this.handleSuccess(response, 'Bon de livraison modifié avec succès');
             this.resetForm();
           },
           error: (error) => {
@@ -337,9 +382,9 @@ filterCommandes(): void {
           }
         });
       } else {
-        this.commandeService.createCommande(formData , 'clients').subscribe({
+        this.transactionService.createTransaction(formData, this.typeIntervenant).subscribe({
           next: (response) => {
-            this.handleSuccess(response, 'Commande créée avec succès');
+            this.handleSuccess(response, 'Bon de livraison créé avec succès');
             this.resetForm();
           },
           error: (error) => {
@@ -350,22 +395,38 @@ filterCommandes(): void {
     }
   }
 
-  private prepareCommandeData(): Commande {
-    const formValue = this.commandeForm.value;
-    const selectedClient = this.clients().find(c => c.id === formValue.client);
-    if (!selectedClient) {
-      throw new Error('Client non trouvé');
+  private prepareTransactionData(): Transaction {
+    const formValue = this.transactionForm.value;
+    const typeIntervenant = formValue.typeIntervenant;
+
+    let selectedIntervenant: Client | Fournisseur | undefined;
+    if (typeIntervenant === 'clients') {
+      selectedIntervenant = this.clients().find(c => c.id === formValue.Id_intervenant);
+    } else {
+      selectedIntervenant = this.fournisseurs().find(f => f.id === formValue.Id_intervenant);
     }
+
+    if (!selectedIntervenant) {
+      throw new Error('Intervenant non trouvé');
+    }
+
+    const selectedDepot = this.depots().find(d => d.id === formValue.id_depot);
+    if (!selectedDepot) {
+      throw new Error('Dépôt non trouvé');
+    }
+
     return {
-      typeIntervenant: 'client',
+      typeIntervenant: formValue.typeIntervenant,
+      Id_intervenant: formValue.Id_intervenant,
+      id_depot: formValue.id_depot,
       code: formValue.code,
-      dateCommande: formValue.dateCommande,
+      dateTransaction: formValue.dateTransaction,
       createdAt: new Date(),
       montantTotal: formValue.montantTotal,
-      client: selectedClient,
-      Id_intervenant : formValue.client,
+      client: typeIntervenant === 'clients' ? selectedIntervenant as Client : undefined,
+      fournisseur: typeIntervenant === 'fournisseurs' ? selectedIntervenant as Fournisseur : undefined,
       lignes: formValue.lignes.map((ligne: any) => ({
-        id:ligne.id,
+        id: ligne.id,
         id_Article: ligne.id_Article,
         quantite: ligne.quantite,
         Prix_HT: ligne.Prix_HT,
@@ -377,34 +438,38 @@ filterCommandes(): void {
     };
   }
 
-  onEdit(commande: Commande): void {
+  onEdit(transaction: Transaction): void {
     this.isEditing.set(true);
-    this.currentEditId.set(commande.id!);
+    this.currentEditId.set(transaction.id!);
+    this.typeIntervenant = transaction.typeIntervenant;
+
     // Clear existing lignes
     while (this.lignes.length !== 0) {
       this.lignes.removeAt(0);
     }
 
-    // Add lignes from commande
-    commande.lignes.forEach(ligne => {
+    // Add lignes from transaction
+    transaction.lignes.forEach(ligne => {
       const article = this.articles().find(a => a.id === ligne.id_Article);
-      this.lignes.push(this.createLigne(article,ligne));
+      this.lignes.push(this.createLigne(article, ligne));
     });
-
-    this.commandeForm.patchValue({
-      code: commande.code,
-      dateCommande: commande.dateCommande,
-      client: commande.client?.id,
-      montantTotal: commande.montantTotal
+    console.log('Editing transaction:', transaction);
+    this.transactionForm.patchValue({
+      typeIntervenant: 'client',
+      Id_intervenant: transaction.client?.id,
+      id_depot: transaction.id_depot,
+      code: transaction.code,
+      dateTransaction: transaction.dateTransaction,
+      montantTotal: transaction.montantTotal
     });
   }
 
-  onDelete(commande: Commande): void {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer la commande "${commande.code}" ?`)) {
+  onDelete(transaction: Transaction): void {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le bon de livraison "${transaction.code}" ?`)) {
       this.isLoading.set(true);
-      this.commandeService.deleteCommande(commande.id!).subscribe({
+      this.transactionService.deleteTransaction(transaction.id!).subscribe({
         next: (response) => {
-          this.handleSuccess(response, 'Commande supprimée avec succès');
+          this.handleSuccess(response, 'Bon de livraison supprimé avec succès');
         },
         error: (error) => {
           this.handleError(error);
@@ -414,9 +479,11 @@ filterCommandes(): void {
   }
 
   resetForm(): void {
-    this.commandeForm.reset({
-      typeIntervenant: 'client',
-      dateCommande: new Date(),
+    this.transactionForm.reset({
+      typeIntervenant: 'clients',
+      Id_intervenant: null,
+      id_depot: null,
+      dateTransaction: new Date(),
       montantTotal: 0
     });
     while (this.lignes.length !== 0) {
@@ -424,7 +491,8 @@ filterCommandes(): void {
     }
     this.isEditing.set(false);
     this.currentEditId.set(null);
-    this.expandedCommande.set(null);
+    this.expandedTransaction.set(null);
+    this.typeIntervenant = 'clients';
   }
 
   private handleSuccess(response: any, successMessage: string): void {
@@ -434,7 +502,7 @@ filterCommandes(): void {
         duration: 3000,
         panelClass: ['success-snackbar']
       });
-      this.loadCommandes();
+      this.loadTransactions();
     } else {
       this.snackBar.open(response || 'Une erreur est survenue', 'Fermer', {
         duration: 5000,
@@ -451,9 +519,14 @@ filterCommandes(): void {
     });
   }
 
-  getClientName(clientId: number): string {
-    const client = this.clients().find(c => c.id === clientId);
-    return client ? client.nomComplet : 'Inconnu';
+  getIntervenantName(intervenantId: number, type: string): string {
+    if (type === 'clients') {
+      const client = this.clients().find(c => c.id === intervenantId);
+      return client ? client.nomComplet : 'Inconnu';
+    } else {
+      const fournisseur = this.fournisseurs().find(f => f.id === intervenantId);
+      return fournisseur ? fournisseur.nomComplet : 'Inconnu';
+    }
   }
 
   getArticleName(articleId: number): string {
@@ -461,4 +534,7 @@ filterCommandes(): void {
     return article ? article.designation : 'Inconnu';
   }
 
+  getIntervenants(): any[] {
+    return this.typeIntervenant === 'clients' ? this.clients() : this.fournisseurs();
+  }
 }

@@ -32,21 +32,21 @@ interface NavItem {
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent {
-  
+
   private router = inject(Router);
   private routerSubscription!: Subscription;
-  
+
   navItems = signal<NavItem[]>([
-    { 
-      icon: 'dashboard', 
-      label: 'Tableau de Bord', 
-      route: '/dashboard', 
+    {
+      icon: 'dashboard',
+      label: 'Tableau de Bord',
+      route: '/dashboard',
       isActive: true,
       isExpanded: false
     },
-    { 
-      icon: 'inventory_2', 
-      label: 'Gestion de Stock', 
+    {
+      icon: 'inventory_2',
+      label: 'Gestion de Stock',
       isActive: false,
       isExpanded: false,
       children: [
@@ -57,9 +57,9 @@ export class SidebarComponent {
         //{ icon: 'compare_arrows', label: 'Transferts', route: '/stock/transfers', isActive: false }
       ]
     },
-    { 
-      icon: 'people', 
-      label: 'Clients', 
+    {
+      icon: 'people',
+      label: 'Clients',
       isActive: false,
       isExpanded: false,
       children: [
@@ -69,9 +69,9 @@ export class SidebarComponent {
         { icon: 'history', label: 'Historique', route: '/clients/history', isActive: false }
       ]
     },
-    { 
-      icon: 'local_shipping', 
-      label: 'Fournisseurs', 
+    {
+      icon: 'local_shipping',
+      label: 'Fournisseurs',
       isActive: false,
       isExpanded: false,
       children: [
@@ -81,21 +81,32 @@ export class SidebarComponent {
         { icon: 'local_shipping', label: 'Livraisons', route: '/suppliers/deliveries', isActive: false }
       ]
     },
-    { 
-      icon: 'shopping_cart', 
-      label: 'Ventes', 
+    {
+      icon: 'shopping_cart',
+      label: 'Ventes',
       isActive: false,
       isExpanded: false,
       children: [
-        { icon: 'point_of_sale', label: 'Point de Vente', route: '/sales/pos', isActive: false },
-        { icon: 'receipt_long', label: 'Commandes', route: '/sales/orders', isActive: false },
-        { icon: 'payment', label: 'Paiements', route: '/sales/payments', isActive: false },
+        { icon: 'receipt_long', label: 'Commandes', route: '/commandeClient', isActive: false },
+        { icon: 'point_of_sale', label: 'Point de Vente', route: '/BonLivraison', isActive: false },
+        { icon: 'Facture', label: 'Facture', route: '/factureClient', isActive: false },
         { icon: 'assignment_return', label: 'Retours', route: '/sales/returns', isActive: false }
       ]
     },
-    { 
-      icon: 'assessment', 
-      label: 'Rapports', 
+    {
+      icon: 'shopping_cart',
+      label: 'Achats',
+      isActive: false,
+      isExpanded: false,
+      children: [
+        { icon: 'receipt_long', label: 'commande', route: '/commandeFournisseur', isActive: false },
+        { icon: 'payment', label: 'Bon Reception', route: '/BonReception', isActive: false },
+        { icon: 'payment', label: 'Facture', route: '/FactureFournisseur', isActive: false },
+      ]
+    },
+    {
+      icon: 'assessment',
+      label: 'Rapports',
       isActive: false,
       isExpanded: false,
       children: [
@@ -106,13 +117,13 @@ export class SidebarComponent {
         { icon: 'description', label: 'Rapports Personnalisés', route: '/reports/custom', isActive: false }
       ]
     },
-    { 
-      icon: 'settings', 
-      label: 'Paramètres', 
+    {
+      icon: 'settings',
+      label: 'Paramètres',
       isActive: false,
       isExpanded: false,
       children: [
-        { icon: 'person', label: 'Utilisateurs', route: '/settings/users', isActive: false },
+        { icon: 'person', label: 'Utilisateurs', route: '/utilisateurx    ', isActive: false },
         { icon: 'store', label: 'Boutique', route: '/settings/store', isActive: false },
         { icon: 'receipt', label: 'Facturation', route: '/settings/billing', isActive: false },
         { icon: 'notifications', label: 'Notifications', route: '/settings/notifications', isActive: false },
@@ -124,7 +135,7 @@ export class SidebarComponent {
   toggleItem(selectedItem: NavItem): void {
     if (selectedItem.children) {
       // Toggle expansion for items with children
-      this.navItems.update(items => 
+      this.navItems.update(items =>
         items.map(item => ({
           ...item,
           isExpanded: item.label === selectedItem.label ? !item.isExpanded : item.isExpanded,
@@ -133,7 +144,7 @@ export class SidebarComponent {
       );
     } else {
       // Select regular items without children
-      this.navItems.update(items => 
+      this.navItems.update(items =>
         items.map(item => ({
           ...item,
           isActive: item.label === selectedItem.label,
@@ -144,7 +155,7 @@ export class SidebarComponent {
   }
 
   selectChildItem(parentLabel: string, childItem: NavItem): void {
-    this.navItems.update(items => 
+    this.navItems.update(items =>
       items.map(item => {
         if (item.label === parentLabel) {
           return {
@@ -182,14 +193,14 @@ export class SidebarComponent {
   }
 
   private updateActiveState(currentUrl: string): void {
-    this.navItems.update(items => 
+    this.navItems.update(items =>
       items.map(item => this.updateItemActiveState(item, currentUrl))
     );
   }
   private updateItemActiveState(item: NavItem, currentUrl: string): NavItem {
     // Check if this item is active
     const isItemActive = item.route === currentUrl;
-    
+
     // Check if any child is active
     let isChildActive = false;
     let children: NavItem[] = [];

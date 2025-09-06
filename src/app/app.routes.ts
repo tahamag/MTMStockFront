@@ -8,7 +8,12 @@ import { ArticleComponent } from './components/Stock/article/article.component';
 import { ClientComponent } from './components/Client/client/client.component';
 import { FournisseurComponent } from './components/Fournisseur/fournisseur/fournisseur.component';
 import { CommandeComponent } from './components/Client/commande/commande.component';
-
+import { commandefrsComponent } from './components/Fournisseur/commande/commande.component';
+import { BonLivraisonComponent } from './components/Client/bon-livraison/bon-livraison.component';
+import { BonReceptionComponent } from './components/Fournisseur/bon-reception/bon-reception.component';
+import { FactureComponent } from './components/Client/facture/facture.component';
+import { FactureFournisseurComponent } from './components/Fournisseur/facture-fournisseur/facture-fournisseur.component';
+import { UtilisateurComponent } from './components/Parametre/utilisateur/utilisateur.component';
 
 export const routes: Routes = [
     {path:'', component:LoginComponent},
@@ -22,8 +27,16 @@ export const routes: Routes = [
     //client
     {path:'client', component:ClientComponent},
     {path:'commandeClient', component:CommandeComponent},
+    {path:'BonLivraison', component:BonLivraisonComponent},
+    {path:'factureClient', component:FactureComponent},
 
     //Fournisseur
     {path:'fournisseur', component:FournisseurComponent},
+    {path:'commandeFournisseur', component:commandefrsComponent},
+    {path:'BonReception', component:BonReceptionComponent},
+    {path:'FactureFournisseur', component:FactureFournisseurComponent},
+
+    //parametre
+    {path:'utilisateur', component:UtilisateurComponent},
 
 ];

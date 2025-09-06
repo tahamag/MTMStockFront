@@ -11,7 +11,7 @@ export class CommandeService {
   private apiUrl = env.apiUrl;
 //fournisseurs  || clients
   getCommandes(intervenant : string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/Commande/${intervenant}`, { 
+    return this.http.get<any>(`${this.apiUrl}/Commande/${intervenant}`, {
     }).pipe(
       catchError(error => {
         return throwError(() => new Error('Erreur lors de la récupération commandes: ' + error.message));
@@ -20,7 +20,7 @@ export class CommandeService {
   }
 
   getCommande(id: number,intervenant : string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/Commande/${intervenant}/${id}`, { 
+    return this.http.get<any>(`${this.apiUrl}/Commande/${intervenant}/${id}`, {
     }).pipe(
       catchError(error => {
         return throwError(() => new Error(`Erreur lors de la récupération de commandes ${intervenant}: ` + error.message));
@@ -29,7 +29,7 @@ export class CommandeService {
   }
 
   createCommande(CommandeData: any,intervenant : string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/Commande/${intervenant}`, CommandeData, { 
+    return this.http.post<any>(`${this.apiUrl}/Commande/${intervenant}`, CommandeData, {
     }).pipe(
       catchError(error => {
         return throwError(() => new Error(`Erreur lors de la création de Commande ${intervenant}: ` + error.error));
@@ -38,7 +38,7 @@ export class CommandeService {
   }
 
   updateCommande(id: number, CommandeData: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/Commande/${id}`, CommandeData, { 
+    return this.http.put<any>(`${this.apiUrl}/Commande/${id}`, CommandeData, {
     }).pipe(
       catchError(error => {
         console.log("service",error)
@@ -48,12 +48,12 @@ export class CommandeService {
   }
 
   deleteCommande(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/Commande/${id}`, { 
+    return this.http.delete<any>(`${this.apiUrl}/Commande/${id}`, {
     }).pipe(
       catchError(error => {
         return throwError(() => new Error('Erreur lors de la suppression de Commande: ' + error.message));
       })
     );
   }
-  
+
 }

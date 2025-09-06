@@ -2,13 +2,14 @@ import { Client } from "./client";
 import { Fournisseur } from "./fournisseur";
 import { Ligne } from "./ligne";
 
-export interface Commande{
+export interface Facture{
 
     id?: number;
     typeIntervenant: string;
     Id_intervenant : number;
+    id_depot : number;
     code: string;
-    dateCommande: Date;
+    dateFacture: Date;
     createdAt: Date;
     updatedAt?: Date;
     montantTotal: number;
