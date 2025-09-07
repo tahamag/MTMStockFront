@@ -46,15 +46,15 @@ export class SidebarComponent {
     },
     {
       icon: 'inventory_2',
-      label: 'Gestion de Stock',
+      label: 'Stock',
       isActive: false,
       isExpanded: false,
       children: [
-        { icon: 'layers', label: 'Tous les Produits', route: '/article', isActive: false },
+        { icon: 'layers', label: 'Produits', route: '/article', isActive: false },
         { icon: 'category', label: 'Catégories', route: '/categorie', isActive: false },
         { icon: 'warehouse', label: 'Dépôts', route: '/depot', isActive: false },
        // { icon: 'inventory', label: 'Inventaire', route: '/stock/inventory', isActive: false },
-        //{ icon: 'compare_arrows', label: 'Transferts', route: '/stock/transfers', isActive: false }
+        { icon: 'compare_arrows', label: 'stock', route: '/stock', isActive: false }
       ]
     },
     {
@@ -63,10 +63,10 @@ export class SidebarComponent {
       isActive: false,
       isExpanded: false,
       children: [
-        { icon: 'group', label: 'Liste des Clients', route: '/client', isActive: false },
-        { icon: 'person_add', label: 'Nouveau Client', route: '/clients/new', isActive: false },
+        { icon: 'group', label: 'Clients', route: '/client', isActive: false },
+       /* { icon: 'person_add', label: 'Nouveau Client', route: '/clients/new', isActive: false },
         { icon: 'loyalty', label: 'Programme Fidélité', route: '/clients/loyalty', isActive: false },
-        { icon: 'history', label: 'Historique', route: '/clients/history', isActive: false }
+        { icon: 'history', label: 'Historique', route: '/clients/history', isActive: false }*/
       ]
     },
     {
@@ -75,10 +75,10 @@ export class SidebarComponent {
       isActive: false,
       isExpanded: false,
       children: [
-        { icon: 'business', label: 'Liste des Fournisseurs', route: '/fournisseur', isActive: false },
-        { icon: 'add_business', label: 'Nouveau Fournisseur', route: '/suppliers/new', isActive: false },
+        { icon: 'business', label: 'Fournisseurs', route: '/fournisseur', isActive: false },
+       /* { icon: 'add_business', label: 'Nouveau Fournisseur', route: '/suppliers/new', isActive: false },
         { icon: 'receipt', label: 'Commandes', route: '/suppliers/orders', isActive: false },
-        { icon: 'local_shipping', label: 'Livraisons', route: '/suppliers/deliveries', isActive: false }
+        { icon: 'local_shipping', label: 'Livraisons', route: '/suppliers/deliveries', isActive: false }*/
       ]
     },
     {
@@ -88,9 +88,9 @@ export class SidebarComponent {
       isExpanded: false,
       children: [
         { icon: 'receipt_long', label: 'Commandes', route: '/commandeClient', isActive: false },
-        { icon: 'point_of_sale', label: 'Point de Vente', route: '/BonLivraison', isActive: false },
-        { icon: 'Facture', label: 'Facture', route: '/factureClient', isActive: false },
-        { icon: 'assignment_return', label: 'Retours', route: '/sales/returns', isActive: false }
+        { icon: 'local_shipping', label: 'Bon Livraison', route: '/BonLivraison', isActive: false },
+        { icon: 'receipt', label: 'Facture', route: '/factureClient', isActive: false },
+       // { icon: 'assignment_return', label: 'Retours', route: '/sales/returns', isActive: false }
       ]
     },
     {
@@ -100,11 +100,11 @@ export class SidebarComponent {
       isExpanded: false,
       children: [
         { icon: 'receipt_long', label: 'commande', route: '/commandeFournisseur', isActive: false },
-        { icon: 'payment', label: 'Bon Reception', route: '/BonReception', isActive: false },
-        { icon: 'payment', label: 'Facture', route: '/FactureFournisseur', isActive: false },
+        { icon: 'local_shipping', label: 'Bon Reception', route: '/BonReception', isActive: false },
+        { icon: 'receipt', label: 'Facture', route: '/FactureFournisseur', isActive: false },
       ]
     },
-    {
+   /* {
       icon: 'assessment',
       label: 'Rapports',
       isActive: false,
@@ -116,18 +116,19 @@ export class SidebarComponent {
         { icon: 'people', label: 'Clients', route: '/reports/clients', isActive: false },
         { icon: 'description', label: 'Rapports Personnalisés', route: '/reports/custom', isActive: false }
       ]
-    },
+    },*/
     {
       icon: 'settings',
       label: 'Paramètres',
       isActive: false,
       isExpanded: false,
       children: [
-        { icon: 'person', label: 'Utilisateurs', route: '/utilisateurx    ', isActive: false },
-        { icon: 'store', label: 'Boutique', route: '/settings/store', isActive: false },
+        { icon: 'person', label: 'Utilisateurs', route: '/utilisateur', isActive: false },
+        { icon: 'person', label: 'profile', route: '/profile', isActive: false },
+       /* { icon: 'store', label: 'Boutique', route: '/settings/store', isActive: false },
         { icon: 'receipt', label: 'Facturation', route: '/settings/billing', isActive: false },
         { icon: 'notifications', label: 'Notifications', route: '/settings/notifications', isActive: false },
-        { icon: 'security', label: 'Sécurité', route: '/settings/security', isActive: false }
+        { icon: 'security', label: 'Sécurité', route: '/settings/security', isActive: false }*/
       ]
     }
   ]);

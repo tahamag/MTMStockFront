@@ -74,13 +74,16 @@
                   <mat-form-field appearance="outline" class="form-field">
                     <mat-label>Mot de passe</mat-label>
                     <input matInput [type]="hidePassword() ? 'password' : 'text'"
-                      formControlName="mot_de_passe" placeholder="Créez un mot de passe">
+                      formControlName="mot_de_passe" placeholder="Créez un mot de passe "
+
+                      >
                     <button mat-icon-button matSuffix (click)="hidePassword.set(!hidePassword())" type="button">
                       <mat-icon>{{hidePassword() ? 'visibility_off' : 'visibility'}}</mat-icon>
                     </button>
                     <mat-error class="text-danger">
                       {{ getPasswordErrorMessage()}}
-                  </mat-error>
+                    </mat-error>
+
                   </mat-form-field>
                 </div>
               </div>
@@ -204,7 +207,7 @@
                   </ng-container>
 
 
-                  <!-- Prix Column Achat -->
+                  <!-- Prix Column Achat
                   <ng-container matColumnDef="role">
                     <th mat-header-cell *matHeaderCellDef>role</th>
                     <td mat-cell *matCellDef="let employe" class="prix-cell">
@@ -212,7 +215,7 @@
                         <span class="price-ttc">{{ employe.role }}</span>
                       </div>
                     </td>
-                  </ng-container>
+                  </ng-container>-->
 
                   <!-- Actions Column -->
                   <ng-container matColumnDef="actions">

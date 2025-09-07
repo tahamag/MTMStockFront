@@ -1,5 +1,4 @@
 import { Categorie } from './categorie';
-// article.model.ts
 export interface Article {
     id: number;
     id_Categorie: number;
@@ -14,5 +13,5 @@ export interface Article {
     image?: string;
     created_at?: Date;
     updated_at?: Date;
-    Categorie: Categorie
+    categorie: Categorie
 }

@@ -14,6 +14,8 @@ import { BonReceptionComponent } from './components/Fournisseur/bon-reception/bo
 import { FactureComponent } from './components/Client/facture/facture.component';
 import { FactureFournisseurComponent } from './components/Fournisseur/facture-fournisseur/facture-fournisseur.component';
 import { UtilisateurComponent } from './components/Parametre/utilisateur/utilisateur.component';
+import { ProfileComponent } from './components/Parametre/profile/profile.component';
+import { StockComponent } from './components/Stock/stock/stock.component';
 
 export const routes: Routes = [
     {path:'', component:LoginComponent},
@@ -24,6 +26,7 @@ export const routes: Routes = [
     {path:'depot', component:DepotComponent},
     {path:'categorie', component:CategorieComponent},
     {path:'article', component:ArticleComponent},
+    {path:'stock', component:StockComponent},
     //client
     {path:'client', component:ClientComponent},
     {path:'commandeClient', component:CommandeComponent},
@@ -38,5 +41,6 @@ export const routes: Routes = [
 
     //parametre
     {path:'utilisateur', component:UtilisateurComponent},
+    {path:'profile', component:ProfileComponent},
 
 ];

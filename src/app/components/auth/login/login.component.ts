@@ -1,4 +1,4 @@
-import { Component, signal} from '@angular/core';
+import { Component, inject, signal} from '@angular/core';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,6 +25,7 @@ export class LoginComponent {
   loginForm : FormGroup;
   errorMessage = signal('');
   hide = signal(true);
+  router = inject(Router);
 
   constructor(
     private AuthService : AuthService,
@@ -71,6 +72,7 @@ export class LoginComponent {
         next:(res : any) =>{
           this.errorMessage.set('');
           this?.AuthService.setToken(res.token);
+          this.router.navigate(['/dashboard']);
         },
         error:(err : any) =>{
           this.errorMessage.set(err.error || 'An error occurred during login');

@@ -226,7 +226,7 @@ export class FactureFournisseurComponent {
         article: [article || null]
       });
     } else {
-      const prixTTC = article ? article.prixV_TTC || 0 : 0;
+      const prixTTC = article ? article.prixA_TTC || 0 : 0;
       const tva = article ? article.tva || 0 : 0;
       const prixHT = prixTTC / (1 + tva / 100);
       return this.fb.group({
@@ -255,7 +255,7 @@ export class FactureFournisseurComponent {
     if (article) {
       const ligne = this.lignes.at(index);
       const quantite = ligne.value.quantite || 1;
-      const prixTTC = article.prixV_TTC || 0;
+      const prixTTC = article.prixA_TTC || 0;
       const tva = article.tva || 0;
       const prixHT = prixTTC / (1 + tva / 100);
 

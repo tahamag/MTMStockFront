@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { env } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { Societe } from '../../models/societe';
 import { Employe } from '../../models/Employe';
 import { auth } from '../../models/auth';
@@ -45,4 +45,17 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('authToken');
   }
+  
+
+  isTokenExpired(): boolean {
+    var token = this.getToken();
+    if (!token) return true;
+    
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expiry = payload.exp;
+    const now = Math.floor(Date.now() / 1000);
+
+    return now > expiry;
+  }
+
 }

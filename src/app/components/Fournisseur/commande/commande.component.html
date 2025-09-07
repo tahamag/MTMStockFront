@@ -94,7 +94,7 @@
                                 <mat-option *ngFor="let article of articles()" [value]="article.id">
                                 {{ article.designation }}
                                 <span *ngIf="article.code">({{ article.code }})</span>
-                                - {{ article.prixV_TTC | currency:'EUR':'symbol':'1.2-2' }} TTC
+                                - {{ article.prixA_TTC | currency:'EUR':'symbol':'1.2-2' }} TTC
                                 </mat-option>
                             </mat-select>
                             </mat-form-field>
@@ -137,7 +137,7 @@
                         <div *ngIf="ligne.value.article" class="article-details">
                             <small>
                             <span class="detail-item">Catégorie: {{ ligne.value.article.categorie.nom }}</span> |
-                            <span class="detail-item">Stock: {{ ligne.value.article.stock || 0 }}</span> |
+                            <!--span class="detail-item">Stock: {{ ligne.value.article.stock || 0 }}<span --> 
                             <span class="detail-item">Ref: {{ ligne.value.article.code }}</span>
                             </small>
                         </div>

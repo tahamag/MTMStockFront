@@ -6,12 +6,12 @@
         <h1>MTMStock</h1>
       </div>
       <div class="header-actions">
-        <button mat-icon-button class="notification-btn" [matMenuTriggerFor]="notificationsMenu">
+        <!--button mat-icon-button class="notification-btn" [matMenuTriggerFor]="notificationsMenu">
           <mat-icon>notifications</mat-icon>
           @if (notificationsCount() > 0) {
             <span class="notification-badge">{{ notificationsCount() }}</span>
           }
-        </button>
+        </button -->
         
         <mat-menu #notificationsMenu="matMenu" class="notifications-menu">
           <div class="notifications-header">
@@ -45,7 +45,7 @@
           <img [src]="user().avatar" alt="User" class="user-avatar">
           <div class="user-info">
             <span class="user-name">{{ user().name }}</span>
-            <span class="user-role">{{ user().role }}</span>
+            <span class="user-role">{{ user().email }}</span>
           </div>
           <button mat-icon-button [matMenuTriggerFor]="userMenu">
             <mat-icon>arrow_drop_down</mat-icon>
@@ -54,13 +54,11 @@
           <mat-menu #userMenu="matMenu" class="user-menu">
             <button mat-menu-item>
               <mat-icon>person</mat-icon>
-              <span>Profil</span>
+              <span>
+                <a class="header-link"  routerLink="/profile">Profil</a>
+              </span>
             </button>
-            <button mat-menu-item>
-              <mat-icon>settings</mat-icon>
-              <span>Paramètres</span>
-            </button>
-            <button mat-menu-item>
+            <button mat-menu-item onclick="logout()">
               <mat-icon>logout</mat-icon>
               <span>Déconnexion</span>
             </button>

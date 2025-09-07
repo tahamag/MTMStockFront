@@ -22,38 +22,39 @@ import { SidebarComponent } from '../../../shared/sidebar/sidebar.component';
 // Services
 import { Employe } from '../../../models/Employe';
 import { UtilisateurService } from '../../../services/utilisateur/utilisateur.service';
-
+import { AuthService } from '../../../services/auth/auth.service';
 @Component({
-  selector: 'app-utilisateur',
+  selector: 'app-profile',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTableModule,
-    MatDialogModule,
-    MatSnackBarModule,
-    MatProgressSpinnerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatChipsModule,
-    HeaderComponent,
-    SidebarComponent,
-],
-  templateUrl: './utilisateur.component.html',
-  styleUrl: './utilisateur.component.css'
+    imports: [
+      CommonModule,
+      ReactiveFormsModule,
+      MatCardModule,
+      MatIconModule,
+      MatButtonModule,
+      MatTableModule,
+      MatDialogModule,
+      MatSnackBarModule,
+      MatProgressSpinnerModule,
+      MatFormFieldModule,
+      MatInputModule,
+      MatSelectModule,
+      MatChipsModule,
+      HeaderComponent,
+      SidebarComponent,
+  ],
+  templateUrl: './profile.component.html',
+  styleUrl: './profile.component.css'
 })
-export class UtilisateurComponent {
+export class ProfileComponent {
+
   private fb = inject(FormBuilder);
   private UtilisateurService = inject(UtilisateurService);
+  private AuthService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
 
   Employes = signal<Employe[]>([]);
   isLoading = signal(false);
-  isEditing = signal(false);
   currentEditId = signal<number | null>(null);
   filterName = signal('');
   filteredEmployes = signal<Employe[]>([]);
@@ -76,7 +77,7 @@ export class UtilisateurComponent {
   }
 
   ngOnInit(): void {
-    this.loadEmployes();
+    this.loadEmployes(this.getUserIdFromToken());
   }
 
   getPasswordErrorMessage(): string{
@@ -88,33 +89,14 @@ export class UtilisateurComponent {
 
     return this.EmployeForm.get('pattern')? 'Nécessite des majuscules, des minuscules et des chiffres' : '';
   }
-  onNameFilterChange(event: any): void {
-    this.filterName.set(event.target.value);
-    this.applyFilters();
-  }
 
-  clearFilters(): void {
-    this.filterName.set('');
-    this.applyFilters();
-  }
-
-  applyFilters(): void {
-    const nameFilter = this.filterName().toLowerCase();
-    this.filteredEmployes.set(
-      this.Employes().filter(Employe => {
-        const matchesName = Employe.nom.includes(nameFilter)
-        return matchesName ;
-      })
-    );
-  }
-
-  loadEmployes(): void {
+  loadEmployes(userId : any): void {
     this.isLoading.set(true);
-    this.UtilisateurService.getEmployes().subscribe({
+    this.UtilisateurService.getEmploye(userId).subscribe({
       next: (response) => {
         if (response) {
           this.Employes.set(response);
-          this.applyFilters();
+          this.onEdit(response)
         }
         this.isLoading.set(false);
       },
@@ -129,35 +111,18 @@ export class UtilisateurComponent {
     if (this.EmployeForm.valid) {
       this.isLoading.set(true);
       const formData = this.EmployeForm.value;
-      if (this.isEditing() && this.currentEditId() !== null) {
         this.UtilisateurService.updateEmploye(this.currentEditId()!, formData).subscribe({
           next: (response) => {
-            this.handleSuccess(response, 'Employe modifié avec succès');
-            this.resetForm();
+            this.handleSuccess(response, 'profile modifié avec succès');
           },
           error: (error) => {
             this.handleError(error);
           }
         });
-      } else {
-      console.log(formData)
-
-        this.UtilisateurService.createEmploye(formData).subscribe({
-          next: (response) => {
-            this.handleSuccess(response, 'Employe créé avec succès');
-            this.resetForm();
-          },
-          error: (error) => {
-            this.handleError(error);
-          }
-        });
-      }
     }
   }
 
   onEdit(Employe: Employe): void {
-    this.isEditing.set(true);
-    this.EmployeForm.get('mot_de_passe')?.disable();
     this.currentEditId.set(Employe.id!);
     this.EmployeForm.patchValue({
       nom:Employe.nom,
@@ -169,27 +134,6 @@ export class UtilisateurComponent {
 
   }
 
-  onDelete(Employe: Employe): void {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer Employe "${Employe.nom}" ?`)) {
-      this.isLoading.set(true);
-      this.UtilisateurService.deleteEmploye(Employe.id!).subscribe({
-        next: (response) => {
-          this.handleSuccess(response, 'Employe supprimé avec succès');
-        },
-        error: (error) => {
-          this.handleError(error);
-        }
-      });
-    }
-  }
-
-  resetForm(): void {
-    this.EmployeForm.reset();
-    this.isEditing.set(false);
-    this.currentEditId.set(null);
-    this.EmployeForm.get('mot_de_passe')?.enable();
-  }
-
   private handleSuccess(response: any, successMessage: string): void {
     this.isLoading.set(false);
     if (response) {
@@ -197,7 +141,7 @@ export class UtilisateurComponent {
         duration: 3000,
         panelClass: ['success-snackbar']
       });
-      this.loadEmployes();
+     // this.loadEmployes();
     } else {
       this.snackBar.open(response.message || 'Une erreur est survenue', 'Fermer', {
         duration: 5000,
@@ -212,6 +156,21 @@ export class UtilisateurComponent {
       duration: 5000,
       panelClass: ['error-snackbar']
     });
+  }
+
+  getUserIdFromToken(): string | null {
+    const token = this?.AuthService.getToken();
+    if (!token) return null;
+
+    try {
+      const payload = token.split('.')[1];
+      const decoded = atob(payload);
+      const parsed = JSON.parse(decoded);
+      return parsed?.nameid || null;
+    } catch (e) {
+      console.error('Failed to decode token:', e);
+      return null;
+    }
   }
 
 }
